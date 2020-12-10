@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+#Project folders to be ignored
+/OpenFace
+/output
+*.jpg
+*.wmv
