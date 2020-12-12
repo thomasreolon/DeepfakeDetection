@@ -18,8 +18,8 @@ FACE_LEFT_EYEBROW  = (22,26, '')
 FACE_NOSE          = (27,35, '')
 FACE_RIGHT_EYE     = (36,41, '')
 FACE_LEFT_EYE      = (42,47, '')
-FACE_OUTER_MOUTH    = (48,59, '')
-FACE_INNER_MOUTH    = (60,67, '')
+FACE_OUTER_MOUTH   = (48,59, '')
+FACE_INNER_MOUTH   = (60,67, '')
 
 
 
@@ -34,9 +34,11 @@ EYES_LEFT_SCLERA  = (36,47, 'eye_lmk_')
 EYES_LEFT_PUPIL   = (48,55, 'eye_lmk_')
 
 
+
 # gaze
 GAZE = ['gaze_0_x','gaze_0_y','gaze_0_z','gaze_1_x','gaze_1_y','gaze_1_z','gaze_angle_x','gaze_angle_y']
 CONFIDENCE = ['confidence']
+
 
 
 # pose
@@ -45,10 +47,10 @@ POSE_ROTATION = ['pose_Rx','pose_Ry','pose_Rz']
 
 
 
-
 # p
 P_GENERAL = ['p_scale','p_rx','p_ry','p_rz','p_tx','p_ty']
 P_BOOO = [f'p_{i}' for i in range(34)]
+
 
 
 # AU

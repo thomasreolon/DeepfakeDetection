@@ -26,11 +26,17 @@ from . import output_extractor
 import cv2 as cv
 import torch
 
+# get_faceLand was just a firt try...
+# 
+#  TODO: 
+#    - substitute get_faceLand with process_images
+#    - implement method process_video
+#
 
 class OpenFaceAPI():
     """
-This class serves as an interface between OpenFace executables and Python.
-given the name of the folder of openface (abs path), this class will simplify the calling of the functions.
+    This class serves as an interface between OpenFace executables and Python.
+    given the name of the folder of openface (abs path), this class will simplify the calling of the functions.
     """
 
     def __init__(self, openface_path:str, out_dir:str='/tmp/openfacesaves'):
@@ -77,7 +83,7 @@ given the name of the folder of openface (abs path), this class will simplify th
         # where the results are stored
         fname = src.split('/')[-1].split('.')[0]
         partial_path = os.path.join(out_dir, fname)
-        return output_extractor.DataExtractor(partial_path)
+        return output_extractor.DataExtractor(partial_path, self)
 
 
 
