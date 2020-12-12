@@ -24,7 +24,7 @@ class DataExtractor():
         self.partial_path     = partial_path
         self.csv:pd.DataFrame = csv
         self.hog              = hog
-        if not csv:
+        if not isinstance(csv, pd.DataFrame):
             self.csv = pd.read_csv(partial_path + '.csv')
 
 
@@ -53,7 +53,7 @@ class DataExtractor():
                 return fp[0].__hash__()
             else:
                 return fp.__hash__()
-        face_parts = face_parts.sort(key=mysort)
+        face_parts.sort(key=mysort)
 
 
         res = []
@@ -66,7 +66,7 @@ class DataExtractor():
                 res += fp
 
         df = self.csv[res]
-        return 
+        return DataExtractor(self.partial_path, df, self.hog)
 
             
 

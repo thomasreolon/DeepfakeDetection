@@ -71,7 +71,6 @@ given the name of the folder of openface (abs path), this class will simplify th
         # execute cmd
         try:
             os.system(CMD)
-            print(f'--> computed {src}, results in {out_dir}')
         except Exception as e:
             print(M.EXE_LANDMARK_IMG.format(CMD, e))
 
