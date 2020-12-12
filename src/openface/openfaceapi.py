@@ -20,8 +20,10 @@
 
 import os
 from . import errormessages as M
+import typing
 import cv2 as cv
 import torch
+
 
 class OpenFaceAPI():
     """
@@ -38,15 +40,21 @@ given the name of the folder of openface (abs path), this class will simplify th
         self._check_init_files(exe_path, openface_path)
 
         # Create Folder to save OpanFace results
-        out_dir = self._get_abs_path(out_dir)
         self.out_dir = out_dir
-        os.system(f'mkdir -p {out_dir}')
+        try:
+            os.mkdir(out_dir)
+        except OSError as e:
+            if e.errno != errno.EEXIST: raise e
 
-    def get_faceLand(self, src:str, out_dir:str|None=None):
+
+    def get_faceLand(self, src:str, out_dir:typing.Union[str,None]=None):
         """
         Take a image conpute landmarks and saves the results in out_dir
         input:  src(path to a image file .jpg .png .bmp .jpeg)
                 out_dir(path where output is stored)
+
+        files generated:
+            fname_aligned, fname.csv, fname.hog, fname.jpg, fname_of_details.txt
         """
         # get path where outputs are saved
         if not out_dir:
