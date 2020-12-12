@@ -9,4 +9,7 @@ openfaceAPI = OpenFaceAPI(PATH_TO_OPENFACE_DIR)
 
 
 # process an image
-openfaceAPI.get_faceLand('../test_data/img/lena.png')
+results = openfaceAPI.get_faceLand('../test_data/img/selfie.jpg')
+
+print(results.csv.head())
+

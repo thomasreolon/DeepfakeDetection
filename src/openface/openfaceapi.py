@@ -18,9 +18,11 @@
 #
 ##########################
 
-import os
-from . import errormessages as M
 import typing
+import errno
+import os
+from . import errors as M
+from . import output_extractor
 import cv2 as cv
 import torch
 
@@ -72,6 +74,11 @@ given the name of the folder of openface (abs path), this class will simplify th
             print(f'--> computed {src}, results in {out_dir}')
         except Exception as e:
             print(M.EXE_LANDMARK_IMG.format(CMD, e))
+
+        # where the results are stored
+        fname = src.split('/')[-1].split('.')[0]
+        partial_path = os.path.join(out_dir, fname)
+        return output_extractor.DataExtractor(partial_path)
 
 
 
