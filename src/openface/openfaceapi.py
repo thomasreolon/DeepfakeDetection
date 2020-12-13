@@ -25,27 +25,6 @@ from . import errors as M
 from . import output_extractor
 
 
-# TODO:  fix       VIDIOC_REQBUFS: Inappropriate ioctl for device
-# opencv do not support .mp4 ????
-
-"""
-VIDIOC_REQBUFS: Inappropriate ioctl for device  ===> rebuild OPENCV
-
-
-I have solved this issue on Ubuntu 16.04.3.
-
-    sudo apt-get install ffmpeg
-    sudo apt-get install libavcodec-dev libavformat-dev libavdevice-dev
-
-    Rebuild OpenCV 3.3.0 with the following commands:
-        cd build
-        cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local  -D WITH_FFMPEG=ON -D WITH_TBB=ON -D WITH_GTK=ON -D WITH_V4L=ON -D WITH_OPENGL=ON -D WITH_CUBLAS=ON -DWITH_QT=OFF -DCUDA_NVCC_FLAGS="-D_FORCE_INLINES" ..
-        make -j7
-        sudo make install
-
-
-"""
-
 class OpenFaceAPI():
     """
     This class serves as an interface between OpenFace executables and Python.
@@ -125,16 +104,25 @@ class OpenFaceAPI():
 
             vtype= 'multi' | 'single'    (number of people in the video)
         """
+        
         if files is None and fdir is None:
             raise Exception(M.EXE_PROCESS_VID)
         assert vtype in ('single', 'multi')
 
+        # get path where outputs are saved
+        if not out_dir:
+            out_dir = self.out_dir
+        else:
+            out_dir = self._get_abs_path(out_dir)
+        
+        # how meny people there are
         if vtype=='multi':
             exe = 'FaceLandmarkVidMulti'
         else:
             exe = 'FaceLandmarkVid'
 
-        formats = ('.avi')
+        # get files parameters 
+        formats = ('.avi', '.mp4')
         if fdir and vtype=='single':
             fdir = self._get_abs_path(fdir)
             files = [f'-f {f}' for f in os.listdir(fdir) if f[-4:] in formats]
@@ -150,6 +138,7 @@ class OpenFaceAPI():
             paths = [f.split('/')[-1] for f in files]
             src = ' '.join([f'-f {f}' for f in files if f[-4:] in formats])
 
+        # if src is short->no files were found.... error
         if len(src)<=6:
             raise Exception(M.EXE_PROCESS_VID_FILES)
 
@@ -157,6 +146,13 @@ class OpenFaceAPI():
 
         # execute it
         os.system(cmd)
+
+        res = {}
+        for p in paths:
+            p_path = os.path.join(out_dir, p.split('.')[0])
+            res[p] = output_extractor.DataExtractor(p_path, self)
+
+        return res
 
 
 

@@ -11,11 +11,6 @@ img_to_process = '../test_data/img/lena.png'       # image to process...
 # setup API to call OpenFace functions
 openfaceAPI = OpenFaceAPI(PATH_TO_OPENFACE_DIR)
 
-#### TRIAL VIDEOS
-openfaceAPI.process_video(files=['../test_data/vid/andrewng.mp4'])
-print('DONE')
-exit(0)
-#### END TRIAL VIDEOS
 
 # process an image
 results = openfaceAPI.get_faceLand(img_to_process)
@@ -45,5 +40,5 @@ for i in range(points.shape[1]):
 
 
 # show image
-cv.imshow('face', img)
+cv.imshow('face_id', img)
 cv.waitKey(0)
