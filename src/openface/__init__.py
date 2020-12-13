@@ -1,4 +1,4 @@
-from . import openfaceapi as api
+from . import openfaceapi
 from . import parts
 
-OpenFaceAPI = api.OpenFaceAPI
+OpenFaceAPI = openfaceapi.OpenFaceAPI

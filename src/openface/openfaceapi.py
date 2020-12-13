@@ -23,15 +23,28 @@ import errno
 import os
 from . import errors as M
 from . import output_extractor
-import cv2 as cv
-import torch
 
-# get_faceLand was just a firt try...
-# 
-#  TODO: 
-#    - substitute get_faceLand with process_images
-#    - implement method process_video
-#
+
+# TODO:  fix       VIDIOC_REQBUFS: Inappropriate ioctl for device
+# opencv do not support .mp4 ????
+
+"""
+VIDIOC_REQBUFS: Inappropriate ioctl for device  ===> rebuild OPENCV
+
+
+I have solved this issue on Ubuntu 16.04.3.
+
+    sudo apt-get install ffmpeg
+    sudo apt-get install libavcodec-dev libavformat-dev libavdevice-dev
+
+    Rebuild OpenCV 3.3.0 with the following commands:
+        cd build
+        cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local  -D WITH_FFMPEG=ON -D WITH_TBB=ON -D WITH_GTK=ON -D WITH_V4L=ON -D WITH_OPENGL=ON -D WITH_CUBLAS=ON -DWITH_QT=OFF -DCUDA_NVCC_FLAGS="-D_FORCE_INLINES" ..
+        make -j7
+        sudo make install
+
+
+"""
 
 class OpenFaceAPI():
     """
@@ -51,8 +64,100 @@ class OpenFaceAPI():
         self.out_dir = out_dir
         try:
             os.mkdir(out_dir)
-        except OSError as e:
-            if e.errno != errno.EEXIST: raise e
+        except OSError as err:
+            if err.errno != errno.EEXIST: raise err
+
+    def process_images(self, files:list=None, fdir:str=None, bboxdir=None, out_dir:str=None):
+        """
+        Function used to compute landmarks of images and saves the results in out_dir
+        input:  
+            files(list of .jpg .png .bmp .jpeg files)
+            out_dir(path where output is stored)
+
+        output:
+            dict( filename-->class_for_extracting_data_from_that_filename )
+
+        files generated:
+            fname_aligned, fname.csv, fname.hog, fname.jpg, fname_of_details.txt
+        """
+        if files is None and fdir is None:
+            raise Exception(M.EXE_PROCESS_IMG)
+        
+        # get path where outputs are saved
+        if not out_dir:
+            out_dir = self.out_dir
+        else:
+            out_dir = self._get_abs_path(out_dir)
+
+        # get source arguments
+        if fdir:
+            fdir = self._get_abs_path(fdir)
+            formats = ['.jpg', '.png', '.bmp', 'jpeg']
+            paths = [f for f in os.listdir(fdir) if f[-4:] in formats]
+            src = f'-fdir {fdir}'
+        else:
+            files = [self._get_abs_path(f) for f in files]
+            paths = [f.split('/')[-1] for f in files]
+            src = ' '.join([f'-f {f}' for f in files])
+
+        # bbox
+        bbox = (bboxdir and f'-bboxdir {bboxdir}') or ''
+
+        # create OpenFace cmd
+        cmd = f"{self.exe_path}/FaceLandmarkImg {src} -out_dir {out_dir} {bbox}"
+
+        # execute it
+        os.system(cmd)
+
+        res = {}
+        for p in paths:
+            p_path = os.path.join(out_dir, p.split('.')[0])
+            res[p] = output_extractor.DataExtractor(p_path, self)
+            # res['lena.jpg'] = DataExtractor('/tmp/openfacesaves/lena', self)
+
+        return res
+
+    def process_video(self, files:list=None, fdir:str=None, vtype='multi', add_param='', out_dir:str=None):
+        """
+        Function used to compute landmarks of videos and saves the results in out_dir
+        
+        input:
+
+            vtype= 'multi' | 'single'    (number of people in the video)
+        """
+        if files is None and fdir is None:
+            raise Exception(M.EXE_PROCESS_VID)
+        assert vtype in ('single', 'multi')
+
+        if vtype=='multi':
+            exe = 'FaceLandmarkVidMulti'
+        else:
+            exe = 'FaceLandmarkVid'
+
+        formats = ('.avi')
+        if fdir and vtype=='single':
+            fdir = self._get_abs_path(fdir)
+            files = [f'-f {f}' for f in os.listdir(fdir) if f[-4:] in formats]
+            paths = [f for f in os.listdir(fdir) if f[-4:] in formats]
+            src = f"-inroot {fdir} {' '.join(files)}"
+        elif fdir:
+            fdir = self._get_abs_path(fdir)
+            formats = ['.jpg', '.png', '.bmp', 'jpeg']
+            paths = [f for f in os.listdir(fdir) if f[-4:] in formats]
+            src = f'-fdir {fdir}'
+        else:
+            files = [self._get_abs_path(f) for f in files]
+            paths = [f.split('/')[-1] for f in files]
+            src = ' '.join([f'-f {f}' for f in files if f[-4:] in formats])
+
+        if len(src)<=6:
+            raise Exception(M.EXE_PROCESS_VID_FILES)
+
+        cmd = f"{self.exe_path}/{exe} {src} -out_dir {out_dir} {add_param}"
+
+        # execute it
+        os.system(cmd)
+
 
 
     def get_faceLand(self, src:str, out_dir:typing.Union[str,None]=None):
@@ -72,13 +177,10 @@ class OpenFaceAPI():
 
         # create OpenFace cmd
         src = self._get_abs_path(src)
-        CMD = f"{self.exe_path}/FaceLandmarkImg -f {src} -out_dir {out_dir}"
+        cmd = f"{self.exe_path}/FaceLandmarkImg -f {src} -out_dir {out_dir}"
 
         # execute cmd
-        try:
-            os.system(CMD)
-        except Exception as e:
-            print(M.EXE_LANDMARK_IMG.format(CMD, e))
+        os.system(cmd)
 
         # where the results are stored
         fname = src.split('/')[-1].split('.')[0]

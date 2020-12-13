@@ -6,9 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
-# other
+# configs for vs code
 .vscode/
 
+# settings to hide error cv2 has no module...
+.pylintrc
 
 # Distribution / packaging
 .Python

@@ -1,11 +1,8 @@
 from openface import OpenFaceAPI
 import openface.parts as parts
 import cv2 as cv
-import numpy as np
 
-"""
-this file show some code snippets on HOW TO USE the openface module
-"""
+# This file show some code snippets on HOW TO USE the openface module
 
 PATH_TO_OPENFACE_DIR = '/home/tom/Desktop/OpenFace'  # where i cloned OpenFace repo 
 img_to_process = '../test_data/img/lena.png'       # image to process...
@@ -14,6 +11,11 @@ img_to_process = '../test_data/img/lena.png'       # image to process...
 # setup API to call OpenFace functions
 openfaceAPI = OpenFaceAPI(PATH_TO_OPENFACE_DIR)
 
+#### TRIAL VIDEOS
+openfaceAPI.process_video(files=['../test_data/vid/andrewng.mp4'])
+print('DONE')
+exit(0)
+#### END TRIAL VIDEOS
 
 # process an image
 results = openfaceAPI.get_faceLand(img_to_process)

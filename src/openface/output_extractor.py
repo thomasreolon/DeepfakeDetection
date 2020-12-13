@@ -7,16 +7,11 @@
 #
 ##########################
 
+import os
+import typing
 import pandas as pd
 import numpy as np
-import typing
-
-# This class is not completed
-# TODO:
-#   - implement to_array()
-#   - create function get_frames()
-#   - 1. implement a method (also in another module) to compare faces
-#   - 2. use the method above to select the most similar face
+from . import face_comparator
 
 class DataExtractor():
     """
@@ -31,6 +26,7 @@ class DataExtractor():
         self.csv:pd.DataFrame = csv
         self.hog              = hog
         self.openfaceAPI      = api
+        self.face_comparator  = face_comparator.FaceComparator(self, partial_path)
         if not isinstance(csv, pd.DataFrame):
             self.csv = pd.read_csv(partial_path + '.csv')
 
@@ -38,7 +34,7 @@ class DataExtractor():
     def get_hog(self):
         """Load histogram of gradients file (to be implemented)"""
         if not self.hog:
-            hog_path = self.partial_path + '.hog'
+            #hog_path = self.partial_path + '.hog'
             self.hog = None #...... implement how to read .hog..
         return self.hog
 
@@ -119,22 +115,39 @@ class DataExtractor():
         return DataExtractor(self.partial_path, self.openfaceAPI, df, self.hog)
 
             
-    def to_array(self, col_to_remove=['face', 'frame', 'confidence']):
+    def to_array(self, col_to_remove=None):
         """
         input:
-            col_to_remove: set of cols that we want to remove
+            col_to_remove: list of cols that we want to remove
 
-        
         output:
-            [
-                [               # face 0
-                    [features...],  # frame 0
-                    [features...],  # frame 1
-                    [features...],  # frame 2
-                ],     
-                [...],          # face 1
-            ]"""
-        pass
+            {
+                0:{               # face 0
+                    0:{features...},  # frame 0
+                    1:{features...},  # frame 1
+                    5:{features...},  # frame 5
+                },
+                1:{...},          # face 1
+            }"""
+        if col_to_remove is None:
+            col_to_remove = ['face', 'frame', 'confidence']
+        
+        df = self.csv
+        faces = set(df['face'].tolist())
+
+        list_of_faces = {}
+        for face in faces:
+            list_of_frames = {}
+            df_face = df.loc[df['face']==face]              # get df where face == f
+            frames = set(df_face['frame'].tolist())
+            for frame in frames:
+                tmp = df_face.loc[df_face['frame']==frame]  # get df where frame == fr & face == f
+                tmp = tmp.drop(col_to_remove, axis=1)       # select features
+                features = np.array(tmp.loc[0].tolist())    # get the first line (if more than one line... many times same person in the same frame)
+                list_of_frames[frame] = features
+            list_of_faces[face] = list_of_frames
+        
+        return list_of_faces
 
     def get_confidence(self, minthreshold:float,  maxthreshold:float=1.):
         """Returns a DataExtractor filtered by confidence >= minthreshold"""
@@ -154,12 +167,25 @@ class DataExtractor():
             if not os.path.isabs(selector):
                 selector = os.path.join(os.getcwd(), selector)
 
-            ####### IMPLEMENT foreach face in csv... compare it to image
+            faces = set(df['face'].tolist())
+            min_face, min_score = -1, 1e10
+            for face in faces:
+                score = self.face_comparator.get_difference_score(face, selector)
+                if (score < min_score):
+                    min_face, min_score = face, score
 
+            if (min_face!=-1):
+                df = df.loc[df['face']==min_face]
+            else:
+                raise Exception('no faces found?')
 
         return DataExtractor(self.partial_path, self.openfaceAPI, df, self.hog)
 
-
+    def get_frame(self, frame:int):
+        """Returns a DataExtractor filtered by csv[frame] == frame"""
+        df = self.csv
+        df = df.loc[df['face'] == frame]
+        return DataExtractor(self.partial_path, self.openfaceAPI, df, self.hog)
 
         
 
@@ -186,29 +212,4 @@ class DataExtractor():
             res += [f'{prev}{d}{i}' for i in range(interval[0], interval[1]+1)]
 
         return res
-
-        
-
-
-
-
-    def read_image_landmark(self, path):
-        """read image.csv from path and generate a class containing its informations"""
-
-        # read file
-        with open(path, 'r') as fin:
-            content = fin.read()
-
-        # 1st line: names of parameters, 2nd: values
-        lines = content.split('\n')
-        params = lines[0].split(',')
-        vals = lines[1].split(',')
-
-        data = [(p,v) for p, v in zip(lines, params)]
-        
-
-
-        # prova.... estrazione features...
-        eye_x = select(data, 'eye_lmk_x', 'eye_lmk_y')
-        eye_X = select(data, 'eye_lmk_X', 'eye_lmk_Y')
 
