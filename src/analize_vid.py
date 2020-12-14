@@ -35,8 +35,10 @@ while True:
         for i in range(points.shape[1]):
             x,y = int(points[0][i]), int(points[1][i])
             frame[y-2:y+2,x-2:x+2] = [0,200,255]
-    except:
-        print(f'failed frame:{fr}')
+    except IndexError:  
+        print(f'IndexError (no records for that frame), failed frame:{fr}')    
+    except ValueError:  
+        print(f'ValueError (no records for that frame), failed frame:{fr}')
 
 
     cv.imshow(filename, frame)

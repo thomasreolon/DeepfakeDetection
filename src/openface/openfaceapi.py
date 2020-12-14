@@ -18,11 +18,11 @@
 #
 ##########################
 
-import typing
 import errno
 import os
 from . import errors as M
 from . import output_extractor
+from .installer import install_openface
 
 
 class OpenFaceAPI():
@@ -31,13 +31,21 @@ class OpenFaceAPI():
     given the name of the folder of openface (abs path), this class will simplify the calling of the functions.
     """
 
-    def __init__(self, openface_path:str, out_dir:str='/tmp/openfacesaves'):
+    def __init__(self, openface_path:str=None, out_dir:str='/tmp/openfacesaves'):
+        if openface_path is None:
+            openface_path = '/'.join(str(__file__).split('/')[:-1])
+            try:
+                self._check_init_files(openface_path)
+            except: # pylint: disable=bare-except
+                install_openface()
+
+
         # Get path where openface executables should be
         exe_path = os.path.join(openface_path, 'build/bin') # path where openface executables are
         self.exe_path = exe_path
 
         # Check that the OpenFace installation folder is found at openface_path
-        self._check_init_files(exe_path, openface_path)
+        self._check_init_files(openface_path)
 
         # Create Folder to save OpanFace results
         self.out_dir = out_dir
@@ -130,7 +138,6 @@ class OpenFaceAPI():
             src = f"-inroot {fdir} {' '.join(files)}"
         elif fdir:
             fdir = self._get_abs_path(fdir)
-            formats = ['.jpg', '.png', '.bmp', 'jpeg']
             paths = [f for f in os.listdir(fdir) if f[-4:] in formats]
             src = f'-fdir {fdir}'
         else:
@@ -156,11 +163,12 @@ class OpenFaceAPI():
 
 
 
-    def _check_init_files(self, exe_path, openface_path):
+    def _check_init_files(self, openface_path):
         """Check that the path given in input is valid"""
 
         # Check that openface_path is correct
         # in theory Openface/exe/FaceLandmarkImg should contain FaceLandmarkImg.cpp
+        exe_path = os.path.join(openface_path, 'build/bin')
         check_path = os.path.join(openface_path, 'exe/FaceLandmarkImg/FaceLandmarkImg.cpp')
         if not os.path.isfile(check_path):
             raise Exception(M.INIT_INVALID_PATH.format(openface_path))
