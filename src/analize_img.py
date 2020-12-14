@@ -22,15 +22,16 @@ parts_of_face = [
 ]
 
 # print features
-print(results.to_array())                             # every feature
-print(results.get_features(parts_of_face).to_array()) # selectiong features
-print(results.get_face(0).get_features(parts_of_face).to_array()) # selecting features
+print(results.to_array())                                           # every feature
+print(results.get_features(parts_of_face).to_array())               # selecting features
+print(results.get_face(0).get_features(parts_of_face).to_array())   # selecting features only of the first face
 
 
 
 ### load image landmarks
 img = cv.imread(img_to_process)
 
+"""
 ###### get & show 3D points
 points = results.get_landmarks(parts_of_face, dimension='3D')
 points += 200  
@@ -38,7 +39,7 @@ points += 200
 for i in range(points.shape[1]):
     x,y = int(points[0][i]), int(points[1][i])
     img[y-2:y+2,x-2:x+2] = [0,255,0]
-
+"""
 ###### get & show 2D points
 points = results.get_landmarks(parts_of_face, dimension='2D')
 

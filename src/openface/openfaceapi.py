@@ -91,7 +91,7 @@ class OpenFaceAPI():
         res = {}
         for p in paths:
             p_path = os.path.join(out_dir, p.split('.')[0])
-            res[p] = output_extractor.DataExtractor(p_path, self)
+            res[p] = output_extractor.ImgDataExtractor(p_path, self)
             # res['lena.jpg'] = DataExtractor('/tmp/openfacesaves/lena', self)
 
         return res
@@ -119,7 +119,7 @@ class OpenFaceAPI():
         if vtype=='multi':
             exe = 'FaceLandmarkVidMulti'
         else:
-            exe = 'FaceLandmarkVid'
+            exe = 'FeatureExtraction'
 
         # get files parameters 
         formats = ('.avi', '.mp4')
@@ -150,39 +150,9 @@ class OpenFaceAPI():
         res = {}
         for p in paths:
             p_path = os.path.join(out_dir, p.split('.')[0])
-            res[p] = output_extractor.DataExtractor(p_path, self)
+            res[p] = output_extractor.VidDataExtractor(p_path, self)
 
         return res
-
-
-
-    def get_faceLand(self, src:str, out_dir:typing.Union[str,None]=None):
-        """
-        Take a image conpute landmarks and saves the results in out_dir
-        input:  src(path to a image file .jpg .png .bmp .jpeg)
-                out_dir(path where output is stored)
-
-        files generated:
-            fname_aligned, fname.csv, fname.hog, fname.jpg, fname_of_details.txt
-        """
-        # get path where outputs are saved
-        if not out_dir:
-            out_dir = self.out_dir
-        else:
-            out_dir = self._get_abs_path(out_dir)
-
-        # create OpenFace cmd
-        src = self._get_abs_path(src)
-        cmd = f"{self.exe_path}/FaceLandmarkImg -f {src} -out_dir {out_dir}"
-
-        # execute cmd
-        os.system(cmd)
-
-        # where the results are stored
-        fname = src.split('/')[-1].split('.')[0]
-        partial_path = os.path.join(out_dir, fname)
-        return output_extractor.DataExtractor(partial_path, self)
-
 
 
 
