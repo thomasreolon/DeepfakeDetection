@@ -23,7 +23,7 @@ class FaceComparator():
         """compare how different are the two faces, lower values <--> similar faces"""
         df = self.data_extractor.csv
 
-        face1 = df.loc[(df['confidence']>0.9) & (df['face_id']==faceid)]
+        face1 = df.loc[(df['confidence']>0.9) & (df[self.data_extractor.fcol]==faceid)]
 
         if (len(df)==0):
             return 1e10

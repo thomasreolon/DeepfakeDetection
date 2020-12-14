@@ -19,7 +19,7 @@ class DataExtractor():
     it in a more readable way
     """
 
-    def __init__(self, partial_path:str, api, csv=None, hog=None):
+    def __init__(self, partial_path:str, api, csv=None, hog=None, is_multi=False):
         """Set results directory & load csv
         partial_path = f'{out_dir}/{filename}'"""
         self.partial_path     = partial_path
@@ -27,6 +27,7 @@ class DataExtractor():
         self.hog              = hog
         self.openfaceAPI      = api
         self.face_comparator  = face_comparator.FaceComparator(self, partial_path)
+        self.fcol             = (is_multi and self.fcol) or 'face'
         if not isinstance(csv, pd.DataFrame):
             self.csv = pd.read_csv(partial_path + '.csv')
 
@@ -56,7 +57,7 @@ class DataExtractor():
 
         # select face
         if faceid is not None:
-            df = df.loc[df['face_id']==faceid]
+            df = df.loc[df[self.fcol]==faceid]
 
         # get coords
         res, n_dim = [], ((dimension=='2D' and 2) or 3)
@@ -98,7 +99,7 @@ class DataExtractor():
         face_parts.sort(key=mysort)
 
         # cols is the list of columns
-        cols = ['face_id', 'frame', 'confidence'] # these columns cannot be removed 
+        cols = [self.fcol, 'frame', 'confidence'] # these columns cannot be removed 
         for fp in face_parts:
             if isinstance(fp, str):
                 cols.append(fp)
@@ -130,22 +131,29 @@ class DataExtractor():
                 1:{...},          # face 1
             }"""
         if col_to_remove is None:
-            col_to_remove = ['face_id', 'frame', 'confidence']
+            col_to_remove = [self.fcol, 'frame', 'confidence']
         
         df = self.csv
-        faces = set(df['face_id'].tolist())
+        faces = set(df[self.fcol].tolist())
 
         list_of_faces = {}
         for face in faces:
             list_of_frames = {}
-            df_face = df.loc[df['face_id']==face]              # get df where face == f
-            frames = set(df_face['frame'].tolist())
-            for frame in frames:
-                tmp = df_face.loc[df_face['frame']==frame]  # get df where frame == fr & face == f
-                tmp = tmp.drop(col_to_remove, axis=1)       # select features
-                features = np.array(tmp.values.tolist())    # (if more than one dimensions line... many times same person in the same frame)
-                list_of_frames[frame] = features
-            list_of_faces[face] = list_of_frames
+            df_face = df.loc[df[self.fcol]==face]              # get df where face == f
+            if 'frame' in df_face:                             # CASE: VIDEO
+                frames = set(df_face['frame'].tolist())
+                for frame in frames:
+                    tmp = df_face.loc[df_face['frame']==frame]  # get df where frame == fr & face == f
+                    tmp = tmp.drop(col_to_remove, axis=1)       # select features
+                    features = np.array(tmp.values.tolist())    # (if more than one dimensions line... many times same person in the same frame)
+                    list_of_frames[frame] = features
+                list_of_faces[face] = list_of_frames
+            else:                                               # CASE: image
+                if ('frame' in col_to_remove):
+                    del col_to_remove[col_to_remove.index('frame')]
+                df_face = df_face.drop(col_to_remove, axis=1)
+                features = np.array(df_face.values.tolist()[0])
+                list_of_faces[face] = features
         
         return list_of_faces
 
@@ -161,13 +169,13 @@ class DataExtractor():
         df = self.csv
         if isinstance(selector, int):
             # selector is an id of the csv
-            df = df.loc[df['face_id'] == selector]
+            df = df.loc[df[self.fcol] == selector]
         elif isinstance(selector, str):
             # selectr is a path to a face
             if not os.path.isabs(selector):
                 selector = os.path.join(os.getcwd(), selector)
 
-            faces = set(df['face_id'].tolist())
+            faces = set(df[self.fcol].tolist())
             min_face, min_score = -1, 1e10
             for face in faces:
                 score = self.face_comparator.get_difference_score(face, selector)
@@ -175,7 +183,7 @@ class DataExtractor():
                     min_face, min_score = face, score
 
             if (min_face!=-1):
-                df = df.loc[df['face_id']==min_face]
+                df = df.loc[df[self.fcol]==min_face]
             else:
                 raise Exception('no faces found?')
 
@@ -184,16 +192,8 @@ class DataExtractor():
     def get_frame(self, frame:int):
         """Returns a DataExtractor filtered by csv[frame] == frame"""
         df = self.csv
-        df = df.loc[df['face_id'] == frame]
+        df = df.loc[df['frame'] == frame]
         return DataExtractor(self.partial_path, self.openfaceAPI, df, self.hog)
-
-        
-
-
-        
-
-
-
 
 
 

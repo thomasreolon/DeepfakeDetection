@@ -137,5 +137,3 @@ dmypy.json
 #Project folders to be ignored
 /OpenFace
 /output
-*.jpg
-*.wmv
