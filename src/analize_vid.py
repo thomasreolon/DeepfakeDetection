@@ -8,7 +8,7 @@ vid_to_process = '../test_data/vid/andrewng.mp4'       # image to process...
 
 
 # setup API to call OpenFace functions
-openfaceAPI = openface.OpenFaceAPI(PATH_TO_OPENFACE_DIR)
+openfaceAPI = openface.OpenFaceAPI()
 
 results = openfaceAPI.process_video(files=[vid_to_process], vtype='single')
 filename = vid_to_process.split('/')[-1]

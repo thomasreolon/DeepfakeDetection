@@ -8,6 +8,7 @@ PATH_TO_OPENFACE_DIR = '/home/tom/Desktop/OpenFace'  # where i cloned OpenFace r
 img_to_process = '../test_data/img/selfie.jpg'       # image to process...
 
 
+PATH_TO_OPENFACE_DIR=None ### if no argument   ==> ask to install
 # setup API to call OpenFace functions
 openfaceAPI = OpenFaceAPI(PATH_TO_OPENFACE_DIR)
 

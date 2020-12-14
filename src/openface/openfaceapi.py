@@ -33,7 +33,7 @@ class OpenFaceAPI():
 
     def __init__(self, openface_path:str=None, out_dir:str='/tmp/openfacesaves'):
         if openface_path is None:
-            openface_path = '/'.join(str(__file__).split('/')[:-1])
+            openface_path = '/'.join(str(__file__).split('/')[:-1])+'/OpenFace'
             try:
                 self._check_init_files(openface_path)
             except: # pylint: disable=bare-except

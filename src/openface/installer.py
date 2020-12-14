@@ -13,13 +13,13 @@ def install_openface():
     mypath = '/'.join(str(__file__).split('/')[:-1])
     os.chdir(mypath)
 
-    install = input('Do you want to in stall OpenFace? [y|N]\nONLY FOR LINUX BASED SYSTEMS')
+    install = input('(if you have already installed Openface, pass as argument the path to OpenFace folder when calling openface.OpenFaceAPI())\nDo you want to in stall OpenFace? [y|N]\nONLY FOR LINUX BASED SYSTEMS\n--> ')
     if (install.lower()=='y'):
         sudo_passw = input(f'[sudo] password for {os.getlogin()}:')
 
         ## download openface
         os.system('git clone https://github.com/TadasBaltrusaitis/OpenFace.git')
-        os.chdir(mypath+'OpenFace')
+        os.chdir(mypath+'/OpenFace')
         os.system('bash ./download_models.sh')
 
         # changing some lines of install.sh (allow opencv to decode videos)

@@ -135,5 +135,5 @@ dmypy.json
 .pyre/
 
 #Project folders to be ignored
-/OpenFace
+**/OpenFace
 /output
