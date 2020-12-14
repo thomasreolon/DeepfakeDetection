@@ -88,6 +88,9 @@ class DataExtractor():
             
         face_parts con include strings of single columns:[face, confidence, AU01_r, ...]   
         """
+        if (len(self.csv)==0):
+            raise Exception(f'(probably the frame do not exist...)\nNo rows found in\n{self.csv.head()}')
+
         if not isinstance(face_parts, list):
             face_parts = [face_parts]
 
@@ -176,6 +179,9 @@ class DataExtractor():
         if 'frame' in df:
             df = df.loc[df['frame']==frame]
 
+        if (len(df)==0):
+            return np.array([[]])
+
         # select face
         if faceid is not None:
             df = df.loc[df['face_id']==faceid]
@@ -186,7 +192,7 @@ class DataExtractor():
             if isinstance(fp, tuple):
                 cols = self._cmp((fp[0],fp[1]),n_dim==2,fp[2])   ## (0, 2, '') -> [x_0, x_1, y_0, y_1]
             else:
-                cols=fp                                          ## already [x_0, x_1, y_0, y_1]
+                cols = fp                                          ## already [x_0, x_1, y_0, y_1]
             for _, row in df[cols].iterrows():
                 tmp = np.array(row.array).copy().reshape(n_dim, -1)
                 res.append(tmp)
