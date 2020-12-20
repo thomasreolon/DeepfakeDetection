@@ -1,12 +1,11 @@
 ###########################
-# 
+#
 #  for an automated fresh install of OpenCv in linux environments
 #
 ##########################
 
-import os
-import re
-
+import os, re
+from getpass import getpass
 
 def install_openface():
     oldpath =  os.getcwd()
@@ -15,7 +14,7 @@ def install_openface():
 
     install = input('(if you have already installed Openface, pass as argument the path to OpenFace folder when calling openface.OpenFaceAPI())\nDo you want to in stall OpenFace? [y|N]\nONLY FOR LINUX BASED SYSTEMS\n--> ')
     if (install.lower()=='y'):
-        sudo_passw = input(f'[sudo] password for {os.getlogin()}:')
+        sudo_passw = getpass(f'[sudo] password for {os.getlogin()}: ')
 
         ## download openface
         os.system('git clone https://github.com/TadasBaltrusaitis/OpenFace.git')
@@ -41,4 +40,3 @@ def install_openface():
     else:
         print('installation stopped.\nopenface python module can\'t work without the compiled OpenFace project')
         exit(0)
-

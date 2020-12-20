@@ -1,4 +1,4 @@
-# FAKE DETECTION IN VIDEOS
+# Fake detention in videos
 
 :construction::construction::construction: currently under development :construction::construction::construction:
 
