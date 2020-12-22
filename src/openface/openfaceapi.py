@@ -1,5 +1,5 @@
 ###########################
-# 
+#
 #  interface for using OpenFace from Python
 #  this class exposes methods that process images/videos
 #
@@ -9,7 +9,7 @@
 #    $ cd OpenFace
 #    $ sudo bash download_models.sh
 #    $ sudo bash install.sh
-#    $ 
+#    $
 #    $ echo "Using OpenFace"
 #    $ python3
 #    >>> import openface    # the module implemented in this repo
@@ -31,7 +31,7 @@ class OpenFaceAPI():
     given the name of the folder of openface (abs path), this class will simplify the calling of the functions.
     """
 
-    def __init__(self, openface_path:str=None, out_dir:str='/tmp/openfacesaves'):
+    def __init__(self, openface_path:str=None, out_dir:str='/'.join(str(__file__).split('/')[:-1])+'/../../output/openfacesaves'):
         if openface_path is None:
             openface_path = '/'.join(str(__file__).split('/')[:-1])+'/OpenFace'
             try:
@@ -52,12 +52,16 @@ class OpenFaceAPI():
         try:
             os.mkdir(out_dir)
         except OSError as err:
-            if err.errno != errno.EEXIST: raise err
+            try:
+                os.mkdir('/'.join(str(__file__).split('/')[:-1])+'/../../output')
+                os.mkdir(out_dir)
+            except OSError as err:
+                if err.errno != errno.EEXIST: raise err
 
     def process_images(self, files:list=None, fdir:str=None, bboxdir=None, out_dir:str=None):
         """
         Function used to compute landmarks of images and saves the results in out_dir
-        input:  
+        input:
             files(list of .jpg .png .bmp .jpeg files)
             out_dir(path where output is stored)
 
@@ -69,7 +73,7 @@ class OpenFaceAPI():
         """
         if files is None and fdir is None:
             raise Exception(M.EXE_PROCESS_IMG)
-        
+
         # get path where outputs are saved
         if not out_dir:
             out_dir = self.out_dir
@@ -107,12 +111,12 @@ class OpenFaceAPI():
     def process_video(self, files:list=None, fdir:str=None, vtype='multi', add_param='', out_dir:str=None):
         """
         Function used to compute landmarks of videos and saves the results in out_dir
-        
+
         input:
 
             vtype= 'multi' | 'single'    (number of people in the video)
         """
-        
+
         if files is None and fdir is None:
             raise Exception(M.EXE_PROCESS_VID)
         assert vtype in ('single', 'multi')
@@ -122,14 +126,14 @@ class OpenFaceAPI():
             out_dir = self.out_dir
         else:
             out_dir = self._get_abs_path(out_dir)
-        
+
         # how meny people there are
         if vtype=='multi':
             exe = 'FaceLandmarkVidMulti'
         else:
             exe = 'FeatureExtraction'
 
-        # get files parameters 
+        # get files parameters
         formats = ('.avi', '.mp4')
         if fdir and vtype=='single':
             fdir = self._get_abs_path(fdir)
@@ -172,7 +176,7 @@ class OpenFaceAPI():
         check_path = os.path.join(openface_path, 'exe/FaceLandmarkImg/FaceLandmarkImg.cpp')
         if not os.path.isfile(check_path):
             raise Exception(M.INIT_INVALID_PATH.format(openface_path))
-        
+
         # Check that executables are present
         files = os.listdir(exe_path) # files that we have
         needed = ['FaceLandmarkImg', 'FaceLandmarkVid', 'FaceLandmarkVidMulti', 'FeatureExtraction'] # files that we need
@@ -194,14 +198,5 @@ class OpenFaceAPI():
         # if it is relative, make it absolute
         if not os.path.isabs(path):
             path = os.path.join(os.getcwd(), path)
-        
+
         return path
-
-
-
-
-
-
-
-
-
