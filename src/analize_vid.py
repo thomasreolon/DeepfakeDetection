@@ -3,8 +3,8 @@ import openface
 import openface.parts as parts
 
 PATH_TO_OPENFACE_DIR = '/home/tom/Desktop/OpenFace'  # where i cloned OpenFace repo 
-vid_to_process = '../test_data/vid/andrewng.mp4'       # image to process...
-
+vid_to_process = '../test_data/vid/manypeople.mp4'       # image to process...
+andrew_face = '../test_data/img/andrew.jpeg'
 
 
 # setup API to call OpenFace functions
@@ -20,7 +20,7 @@ cap = cv.VideoCapture(vid_to_process)
 
 print(results.get_face(0).get_features([parts.FACE]).to_array())   # selecting features only of the first face
 
-
+results = results.get_face(andrew_face)
 
 
 ############# show labels

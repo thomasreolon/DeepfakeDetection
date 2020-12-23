@@ -23,13 +23,12 @@ class FaceComparator():
         """compare how different are the two faces, lower values <--> similar faces"""
         df = self.data_extractor.csv
 
-        face1 = df.loc[(df['confidence']>0.9) & (df[self.data_extractor.fcol]==faceid)]
+        face1 = df.loc[(df['confidence']>0.9) & (df[self.data_extractor.face_col]==faceid)]
 
         if (len(df)==0):
             return 1e10
 
-        face2 = self.data_extractor.openfaceAPI.process_images(files=[path_to_face])
-        face2 = face2[path_to_face.split('/')[-1]]
+        face2 = self._analyze_img(path_to_face)
 
         s1 = self.score(face1)
         s2 = self.score(face2)
@@ -54,8 +53,14 @@ class FaceComparator():
         arr  = df[cols].values.tolist()
         p1, p2 = np.array(arr[:3]), np.array(arr[-3:])
         diff = p1 - p2
-        return diff.dot(diff)
+        return diff.dot(diff.T).squeeze()
 
 
+    def _analyze_img(self, path_to_face):
+        if path_to_face not in self.cache:
+            face = self.data_extractor.openfaceAPI.process_images(files=[path_to_face])
+            face = face[path_to_face.split('/')[-1]].csv
+            self.cache[path_to_face] = face
         
+        return self.cache[path_to_face]
 

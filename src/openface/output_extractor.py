@@ -153,6 +153,7 @@ class DataExtractor():
             for face in faces:
                 score = self.face_comparator.get_difference_score(face, selector)
                 if (score < min_score):
+                    print(f'best face: {face}')
                     min_face, min_score = face, score
 
             if (min_face!=-1):
