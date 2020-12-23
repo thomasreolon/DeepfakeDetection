@@ -1,5 +1,5 @@
 ###########################
-# 
+#
 #  OpenFace produces a .csv containing the informations about a face.
 #  this file reads these csvs and return a more readable data structure
 #
@@ -44,7 +44,7 @@ class DataExtractor():
             #hog_path = self.partial_path + '.hog'
             self.hog = None #...... implement how to read .hog..
         return self.hog
-  
+
 
 
     def to_array(self, col_to_remove=None):
@@ -54,7 +54,7 @@ class DataExtractor():
         """
         if col_to_remove is None:
             col_to_remove = [*self.to_remove]
-        
+
         df = self.csv
         faces = set(df[self.face_col].tolist())
 
@@ -81,12 +81,12 @@ class DataExtractor():
 
 
     def get_features(self, face_parts:list, dimension='2D'):
-        """Returns a DataExtractor containing only the columns from face_parts 
-        input: 
+        """Returns a DataExtractor containing only the columns from face_parts
+        input:
             face_parts:    a list of prats of the face, defined in openface.parts
             dimension:     'both'|'2D'|'3D'
-            
-        face_parts con include strings of single columns:[face, confidence, AU01_r, ...]   
+
+        face_parts con include strings of single columns:[face, confidence, AU01_r, ...]
         """
         if (len(self.csv)==0):
             raise Exception(f'(probably the frame do not exist...)\nNo rows found in\n{self.csv.head()}')
@@ -104,7 +104,7 @@ class DataExtractor():
         face_parts.sort(key=mysort)
 
         # cols is the list of columns
-        cols = [*self.to_maintain] # these columns cannot be removed 
+        cols = [*self.to_maintain] # these columns cannot be removed
         for fp in face_parts:
             if isinstance(fp, str):
                 cols.append(fp)
@@ -165,11 +165,11 @@ class DataExtractor():
 
 
     def get_landmarks(self, face_parts:list, faceid:int=None, frame:int=0, dimension='2D' ):
-        """Returns a DataExtractor containing only the columns from face_parts 
-        input: 
+        """Returns a DataExtractor containing only the columns from face_parts
+        input:
             face_parts:    a list of prats of the face, only parts.FACE_ and parts.EYES are usable
             dimension:     '2D'|'3D'
-            
+
         difference from   get_features: the result is an array shaped(-1, n_dim)
         """
         if not isinstance(face_parts, list):
@@ -210,7 +210,7 @@ class DataExtractor():
     def _cmp(self, interval:tuple, is2D:bool, prev:str=''):
         """function to select specific columns of the CSV"""
         res = []
-        
+
         # if points in 2D or 3D
         dimensions = ['X_', 'Y_', 'Z_']
         if is2D:
@@ -261,13 +261,10 @@ class VidDataExtractor(DataExtractor):
         df = self.csv
         df = df.loc[df['frame'] == frame]
         return VidDataExtractor(self.partial_path, self.openfaceAPI, df, self.hog)
-    
+
 
     def get_only_success(self):
         """Returns a DataExtractor filtered by csv[success] == 1"""
         df = self.csv
         df = df.loc[df['success'] == 1]
         return VidDataExtractor(self.partial_path, self.openfaceAPI, df, self.hog)
-
-
-
