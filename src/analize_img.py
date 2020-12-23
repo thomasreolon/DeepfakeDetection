@@ -1,11 +1,18 @@
 from openface import OpenFaceAPI
-import openface.parts as parts
-import cv2 as cv
+import openface.parts as parts, cv2 as cv, argparse
+
+#extracting arguments from command line
+#--image image name to process
+parser = argparse.ArgumentParser(description='A program to process videos')
+parser.add_argument('--image', help='the image\'s name, it has to be inside <project>/test_data/img (DEFAULT = selfie.jpg)', default="selfie.jpg")
+args = parser.parse_args()
+
+image = args.image
 
 # This file show some code snippets on HOW TO USE the openface module
 
-PATH_TO_OPENFACE_DIR = '/home/tom/Desktop/OpenFace'  # where i cloned OpenFace repo 
-img_to_process = '../test_data/img/selfie.jpg'       # image to process...
+PATH_TO_OPENFACE_DIR = '/home/tom/Desktop/OpenFace'  # where i cloned OpenFace repo
+img_to_process = f'../test_data/img/{image}'       # image to process...
 
 
 PATH_TO_OPENFACE_DIR=None ### if no argument   ==> ask to install
@@ -35,7 +42,7 @@ img = cv.imread(img_to_process)
 """
 ###### get & show 3D points
 points = results.get_landmarks(parts_of_face, dimension='3D')
-points += 200  
+points += 200
 
 for i in range(points.shape[1]):
     x,y = int(points[0][i]), int(points[1][i])
