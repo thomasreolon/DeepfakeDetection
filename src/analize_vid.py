@@ -16,7 +16,7 @@ object_to_track = args.objtotrack
 
 PATH_TO_OPENFACE_DIR = '/home/tom/Desktop/OpenFace'  # where i cloned OpenFace repo
 vid_to_process = f'../test_data/vid/{video_name}'   # video to process...
-andrew_face = f'../test_data/img/{object_to_track}' # object to track in the video
+face_to_detect = f'../test_data/img/{object_to_track}' # object to track in the video
 
 
 # setup API to call OpenFace functions
@@ -32,7 +32,7 @@ cap = cv.VideoCapture(vid_to_process)
 
 print(results.get_face(0).get_features([getattr(parts, part_to_process)]).to_array())   # selecting features only of the first face
 
-results = results.get_face(andrew_face)
+results = results.get_face(face_to_detect)
 
 
 ############# show labels
