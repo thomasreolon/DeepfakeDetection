@@ -5,7 +5,6 @@
 ##########################
 
 import os, re
-from getpass import getpass
 
 def install_openface():
     oldpath =  os.getcwd()
@@ -14,12 +13,14 @@ def install_openface():
 
     install = input('(if you have already installed Openface, pass as argument the path to OpenFace folder when calling openface.OpenFaceAPI())\nDo you want to in stall OpenFace? [y|N]\nONLY FOR LINUX BASED SYSTEMS\n--> ')
     if (install.lower()=='y'):
-        sudo_passw = getpass(f'[sudo] password for {os.getlogin()}: ')
 
         ## download openface
-        os.system('git clone https://github.com/TadasBaltrusaitis/OpenFace.git')
-        os.chdir(mypath+'/OpenFace')
-        os.system('bash ./download_models.sh')
+        if not os.path.exists('./OpenFace'):
+            os.system('git clone https://github.com/TadasBaltrusaitis/OpenFace.git')
+            os.chdir(mypath+'/OpenFace')
+
+        if not os.path.exists('./OpenFace/lib/local/LandmarkDetector/model/patch_experts/cen_patches_0.50_of.dat'):
+            os.system('bash ./download_models.sh')
 
         # # changing some lines of install.sh (allow opencv to decode videos)
         with open(f'{mypath}/OpenFace/install.sh', 'r') as f:
@@ -36,7 +37,7 @@ def install_openface():
 
         # install OpenFace
         os.chdir(mypath+'/OpenFace')
-        os.system(f'echo {sudo_passw} | sudo bash ./install.sh ')
+        os.system('sudo bash ./install.sh ')
         os.chdir(oldpath)
     else:
         print('installation stopped.\nopenface python module can\'t work without the compiled OpenFace project')

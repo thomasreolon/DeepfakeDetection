@@ -116,7 +116,7 @@ class OpenFaceAPI():
 
             vtype= 'multi' | 'single'    (number of people in the video)
         """
-
+        res = {}
         if files is None and fdir is None:
             raise Exception(M.EXE_PROCESS_VID)
         assert vtype in ('single', 'multi')
@@ -135,9 +135,11 @@ class OpenFaceAPI():
 
         # get files parameters
         formats = ('.avi', '.mp4')
-        if fdir and vtype=='single':
+        if fdir:   # and vtype=='single':  # ----> commenting allows the use of cache
             fdir = self._get_abs_path(fdir)
-            files = [f'-f {f}' for f in os.listdir(fdir) if f[-4:] in formats]
+            files = os.listdir(fdir)
+            files = self._non_in_cache(files, res, output_extractor.VidDataExtractor)
+            files = [f'-f {f}' for f in files if f[-4:] in formats]
             paths = [f for f in os.listdir(fdir) if f[-4:] in formats]
             src = f"-inroot {fdir} {' '.join(files)}"
         elif fdir:
@@ -146,11 +148,12 @@ class OpenFaceAPI():
             src = f'-fdir {fdir}'
         else:
             files = [self._get_abs_path(f) for f in files]
+            files = self._non_in_cache(files, res, output_extractor.VidDataExtractor)
             paths = [f.split('/')[-1] for f in files]
             src = ' '.join([f'-f {f}' for f in files if f[-4:] in formats])
 
         # if src is short->no files were found.... error
-        if len(src)<=6:
+        if len(src)<=6 and len(res)==0:
             raise Exception(M.EXE_PROCESS_VID_FILES)
 
         cmd = f"{self.exe_path}/{exe} {src} -out_dir {out_dir} {add_param}"
@@ -158,14 +161,22 @@ class OpenFaceAPI():
         # execute it
         os.system(cmd)
 
-        res = {}
         for p in paths:
             p_path = os.path.join(out_dir, p.split('.')[0])
             res[p] = output_extractor.VidDataExtractor(p_path, self)
 
         return res
 
-
+    def _non_in_cache(self, files, res, CL):
+        """foreach file in files: if a csv for that file exists: create a DataExtractor for it"""
+        found = set()
+        for f in files:
+            fname = ( os.path.isabs(f) and f.split('/')[-1] ) or f
+            partial_path = os.path.join(self.out_dir, fname.split('.')[0])
+            if os.path.exists(partial_path+'.csv'):
+                res[fname] = CL(partial_path, self)
+                found.add(f)
+        return list(set(files)-found)
 
     def _check_init_files(self, openface_path):
         """Check that the path given in input is valid"""

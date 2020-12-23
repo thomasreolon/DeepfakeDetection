@@ -44,7 +44,7 @@ process_images(files=['a.mp4', 'b.avi'])   or process_images(fdir='./vids')
 """
 
 EXE_PROCESS_VID_FILES = """
-No valid files found. The only valid format is .avi
+No valid files found. The only valid format is .avi or .mp4
 """
 
 EXE_LANDMARK_IMG = """
