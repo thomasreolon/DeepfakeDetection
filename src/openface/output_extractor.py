@@ -269,5 +269,9 @@ class VidDataExtractor(DataExtractor):
         df = df.loc[df['success'] == 1]
         return VidDataExtractor(self.partial_path, self.openfaceAPI, df, self.hog)
 
+    def get_frame_avg(self):
+        return list(self.csv.mean())
 
+    def get_frame_std(self):
+        return list(self.csv.std())
 

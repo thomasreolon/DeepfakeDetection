@@ -31,7 +31,10 @@ class OpenFaceAPI():
     given the name of the folder of openface (abs path), this class will simplify the calling of the functions.
     """
 
-    def __init__(self, openface_path:str=None, out_dir:str='/'.join(str(__file__).split('/')[:-1])+'/../../output/openfacesaves'):
+    def __init__(self, openface_path:str=None, out_dir:str=None):
+        if out_dir is None:
+            out_dir = '/'.join(str(__file__).split('/')[:-1])+'/../../output/openfacesaves'
+        
         if openface_path is None:
             openface_path = '/'.join(str(__file__).split('/')[:-1])+'/OpenFace'
             try:
