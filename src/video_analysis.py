@@ -28,7 +28,8 @@ COLS = AU
 os.system(f'mkdir -d {DIR}')
 gdd.download_file_from_google_drive(file_id='1BecNByKUqYJJo1VwM01C2DeFIwokD6ab',    # my GDrive
                                     dest_path=DIR+'/data.zip',
-                                    unzip=True)
+                                    unzip=True, overwrite=False)
+os.system(f'rm {DIR}/data.zip')
 
 
 ######## Analysis of the Videos
@@ -58,7 +59,7 @@ for s in subfold:
 def norm(X, mean, std):
     if std == 0:
         std = 0.1
-    num =  np.exp(((X-mean)/std)**(1/2)/-2)
+    num =  np.exp(((X-mean)/std)**2/-2)
     denom = std*2.5066282
     return num/denom
 
@@ -79,19 +80,10 @@ for i, au in enumerate(parts.AU):
         mu, sigma = values.mean(), values.std()
         x = np.linspace(0,1, 100)
         y = norm(x, mu, sigma)
-        print(x)
-        print(y)
-        print('--')
         axs[a, b].plot(x, y, f'tab:{color}')
 
 
-
-for ax in axs.flat:
-    ax.set(xlabel='fake vs real', ylabel='pd')
-
-# Hide x labels and tick labels for top plots and y ticks for right plots.
-for ax in axs.flat:
-    ax.label_outer()
+fig = plt.gcf()
+fig.suptitle(f"Distrub of Action Units for {subfold[0]}(red) & {subfold[1]}(blue)", fontsize=14)
 
 plt.show()
-print(f'-----> RED = {subfold[0]}')
