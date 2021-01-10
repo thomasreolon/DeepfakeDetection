@@ -50,10 +50,8 @@ avgs = {}
 for s in subfold:
     avgs[s] = []
     for _, extractor in results[s].items():
-        extractor = extractor.get_confidence(0.75).get_features(parts.AU)
+        extractor = extractor.get_features(parts.AU)
         avgs[s].append(extractor.get_frame_avg())
-
-
 
 
 def norm(X, mean, std):

@@ -74,7 +74,7 @@ class DataExtractor():
                 df_face = df_face.drop(col_to_remove, axis=1)
                 features = np.array(df_face.values.tolist()[0])
                 list_of_faces[face] = features
-        
+
         return list_of_faces
 
 
@@ -222,8 +222,33 @@ class DataExtractor():
 
         return res
 
+    def get_raw_features(self, features_list_r = [], features_list_c = [], filtered = True):
+        feature_r = {}
+        feature_c = {}
 
+        for feature in features_list_r:
+            v = self.csv[feature]
+            values = []
+            for value in v:
+                values.append(value)
+            feature_r[feature] = values
 
+        for feature in features_list_c:
+            v = self.csv[feature]
+            values = []
+            for value in v:
+                values.append(value)
+            feature_c[feature] = values
+
+        if filtered:
+            for AU in feature_r:
+                _r = feature_r[AU]
+                _c = feature_c[AU.replace("r", "c")]
+                for index,value in enumerate(_c):
+                    if(value == 0):
+                        _r[index] = 0.0
+                feature_r[AU] = _r
+        return feature_r
 
 
 class ImgDataExtractor(DataExtractor):
@@ -274,5 +299,3 @@ class VidDataExtractor(DataExtractor):
 
     def get_frame_std(self):
         return list(self.csv.std())
-
-
