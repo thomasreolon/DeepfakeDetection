@@ -60,3 +60,10 @@ AU              = AU_INTENSITIES + AU_PRESENCE
 
 AU_paper_r = ['AU01_r', 'AU02_r', 'AU04_r', 'AU05_r', 'AU06_r', 'AU07_r', 'AU09_r', 'AU10_r', 'AU12_r', 'AU14_r', 'AU15_r', 'AU17_r', 'AU20_r', 'AU23_r', 'AU25_r', 'AU26_r']
 AU_paper_c = ['AU01_c', 'AU02_c', 'AU04_c', 'AU05_c', 'AU06_c', 'AU07_c', 'AU09_c', 'AU10_c', 'AU12_c', 'AU14_c', 'AU15_c', 'AU17_c', 'AU20_c', 'AU23_c', 'AU25_c', 'AU26_c']
+POSE_ROTATION_X_Z = ['pose_Rx', 'pose_Rz']
+MOUTH_right = 54
+MOUTH_left = 48
+MOUTH_up = 51
+MOUTH_down = 57
+MOUTH_H = ['X_'+str(MOUTH_right), 'Y_'+str(MOUTH_right), 'Z_'+str(MOUTH_right), 'X_'+str(MOUTH_left), 'Y_'+str(MOUTH_left), 'Z_'+str(MOUTH_left)]
+MOUTH_V = ['X_'+str(MOUTH_up), 'Y_'+str(MOUTH_up), 'Z_'+str(MOUTH_up), 'X_'+str(MOUTH_down), 'Y_'+str(MOUTH_down), 'Z_'+str(MOUTH_down)]

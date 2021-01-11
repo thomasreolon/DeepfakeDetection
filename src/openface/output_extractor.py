@@ -222,23 +222,16 @@ class DataExtractor():
 
         return res
 
-    def get_raw_features(self, features_list_r = [], features_list_c = [], filtered = True):
+    def get_raw_features(self, AU_r = [], AU_c = [], pose = [], mouth_v = [], mouth_h = [], filtered = True):
         feature_r = {}
         feature_c = {}
+        features = {}
 
-        for feature in features_list_r:
-            v = self.csv[feature]
-            values = []
-            for value in v:
-                values.append(value)
-            feature_r[feature] = values
+        for feature in AU_r:
+            feature_r[feature] = self.get_array(self.csv[feature])
 
-        for feature in features_list_c:
-            v = self.csv[feature]
-            values = []
-            for value in v:
-                values.append(value)
-            feature_c[feature] = values
+        for feature in AU_c:
+            feature_c[feature] = self.get_array(self.csv[feature])
 
         if filtered:
             for AU in feature_r:
@@ -248,8 +241,25 @@ class DataExtractor():
                     if(value == 0):
                         _r[index] = 0.0
                 feature_r[AU] = _r
-        return feature_r
 
+        features = feature_r.copy()
+
+        for p in pose:
+            features[p] = self.get_array(self.csv[p])
+
+        for p in mouth_h:
+            features[p] = self.get_array(self.csv[p])
+
+        for p in mouth_v:
+            features[p] = self.get_array(self.csv[p])
+
+        return features
+
+    def get_array(self, obj):
+        values = []
+        for value in obj:
+            values.append(value)
+        return values
 
 class ImgDataExtractor(DataExtractor):
     """
