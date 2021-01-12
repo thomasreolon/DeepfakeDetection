@@ -7,10 +7,8 @@
 #
 ##########################
 
-import os
-import typing
-import pandas as pd
-import numpy as np
+import os, math, typing, pandas as pd, numpy as np
+from . import parts
 from . import face_comparator
 
 
@@ -247,12 +245,16 @@ class DataExtractor():
         for p in pose:
             features[p] = self.get_array(self.csv[p])
 
+        mouth = {}
         for p in mouth_h:
-            features[p] = self.get_array(self.csv[p])
+            mouth[p] = self.get_array(self.csv[p])
 
         for p in mouth_v:
-            features[p] = self.get_array(self.csv[p])
+            mouth[p] = self.get_array(self.csv[p])
 
+        distances = self.get_mouth_distances(mouth)
+        features['mouth_dist_h'] = distances[0]
+        features['mouth_dist_v'] = distances[1]
         return features
 
     def get_array(self, obj):
@@ -260,6 +262,48 @@ class DataExtractor():
         for value in obj:
             values.append(value)
         return values
+
+    '''
+    Get distances between points of the mouth using points declared in parts
+    '''
+    def get_mouth_distances(self, mouth):
+        mouth_h_x_a = mouth[parts.MOUTH_H_x_a]
+        mouth_h_y_a = mouth[parts.MOUTH_H_y_a]
+        mouth_h_z_a = mouth[parts.MOUTH_H_z_a]
+        mouth_h_x_b = mouth[parts.MOUTH_H_x_b]
+        mouth_h_y_b = mouth[parts.MOUTH_H_y_b]
+        mouth_h_z_b = mouth[parts.MOUTH_H_z_b]
+
+        mouth_v_x_a = mouth[parts.MOUTH_V_x_a]
+        mouth_v_y_a = mouth[parts.MOUTH_V_y_a]
+        mouth_v_z_a = mouth[parts.MOUTH_V_z_a]
+        mouth_v_x_b = mouth[parts.MOUTH_V_x_b]
+        mouth_v_y_b = mouth[parts.MOUTH_V_y_b]
+        mouth_v_z_b = mouth[parts.MOUTH_V_z_b]
+
+        mouth_v_dist = []
+        mouth_h_dist = []
+
+        for index, x0 in enumerate(mouth_h_x_a):
+            y0 = mouth_h_y_a[index]
+            z0 = mouth_h_z_a[index]
+            x1 = mouth_h_x_b[index]
+            y1 = mouth_h_y_b[index]
+            z1 = mouth_h_z_b[index]
+            mouth_h_dist.append(self.euclidean_distance(x0,y0,z0,x1,y1,z1))
+
+        for index, x0 in enumerate(mouth_v_x_a):
+            y0 = mouth_v_y_a[index]
+            z0 = mouth_v_z_a[index]
+            x1 = mouth_v_x_b[index]
+            y1 = mouth_v_y_b[index]
+            z1 = mouth_v_z_b[index]
+            mouth_v_dist.append(self.euclidean_distance(x0,y0,z0,x1,y1,z1))
+
+        return [mouth_h_dist, mouth_v_dist]
+
+    def euclidean_distance(self, x0, y0, z0, x1, y1, z1):
+        return math.sqrt((pow((x0-x1),2)+pow((y0-y1),2)+pow((z0-z1),2)))
 
 class ImgDataExtractor(DataExtractor):
     """

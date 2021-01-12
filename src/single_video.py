@@ -14,9 +14,6 @@ video_name = args.vn
 part_to_process = args.part
 # object_to_track = args.objtotrack
 
-def euclidean_distance(x0, y0, z0, x1, y1, z1):
-    return math.sqrt((pow((x0-x1),2)+pow((y0-y1),2)+pow((z0-z1),2)))
-
 PATH_TO_OPENFACE_DIR = '/home/tom/Desktop/OpenFace'  # where i cloned OpenFace repo
 vid_to_process = f'../test_data/vid/{video_name}'   # video to process...
 
@@ -31,3 +28,5 @@ for video_name, extractor in results.items():
                                           pose = parts.POSE_ROTATION_X_Z,
                                           mouth_h = parts.MOUTH_H,
                                           mouth_v = parts.MOUTH_V)
+
+print(features)
