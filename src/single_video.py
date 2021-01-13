@@ -1,4 +1,4 @@
-import cv2 as cv, openface, openface.parts as parts, argparse, math
+import cv2 as cv, openface, openface.parts as parts, argparse, math, openface.library as library
 
 #extracting arguments from command line
 #--vn video name to process
@@ -29,4 +29,16 @@ for video_name, extractor in results.items():
                                           mouth_h = parts.MOUTH_H,
                                           mouth_v = parts.MOUTH_V)
 
-print(features)
+features_matrix = []
+
+for f0 in features:
+    f0 = features[f0]
+    row = []
+    for f1 in features:
+        f1 = features[f1]
+        row.append(library.pearson_correlation(f0, f1))
+    features_matrix.append(row)
+
+# print(features_matrix[0])
+# print(features_matrix[len(features_matrix)-1])
+print(features_matrix)
