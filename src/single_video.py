@@ -39,6 +39,4 @@ for f0 in features:
         row.append(library.pearson_correlation(f0, f1))
     features_matrix.append(row)
 
-# print(features_matrix[0])
-# print(features_matrix[len(features_matrix)-1])
 print(features_matrix)
