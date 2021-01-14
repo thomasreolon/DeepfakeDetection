@@ -136,5 +136,5 @@ dmypy.json
 
 #Project folders to be ignored
 **/OpenFace
-/output
+**/output
 **/fake_vs_real

@@ -220,6 +220,8 @@ class DataExtractor():
 
         return res
 
+      
+
     def get_raw_features(self, AU_r = [], AU_c = [], pose = [], mouth_v = [], mouth_h = [], filtered = True):
         feature_r = {}
         feature_c = {}
@@ -263,10 +265,10 @@ class DataExtractor():
             values.append(value)
         return values
 
-    '''
-    Get distances between points of the mouth using points declared in parts
-    '''
     def get_mouth_distances(self, mouth):
+        """
+        Get distances between points of the mouth using points declared in parts
+        """
         mouth_h_x_a = mouth[parts.MOUTH_H_x_a]
         mouth_h_y_a = mouth[parts.MOUTH_H_y_a]
         mouth_h_z_a = mouth[parts.MOUTH_H_z_a]
