@@ -14,14 +14,15 @@ This project uses [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace.git) 
 ## Project structure:
 
     src
-    ├── openface          [package to interact with OpenFace]
-    │   ├── installer     [script that can install OpenFace automatically]
-    │   └── openfaceapi   [class that can process images/videos]
+    ├── videoanalyzer         [simplify the extraction of the 190 correlation features]
+    |   |
+    |   ├── openface          [package to interact with OpenFace]
+    |   │   ├── installer     [script that can install OpenFace automatically]
+    |   │   └── openfaceapi   [class that can process images/videos]
     |
-    ├── __future__        [stuff to detect fake videos]
-    │   ├── ...
     |
-    ├──main.py            [project demo]
+    ├── train.py              [trains a 2classes svm classifier]
+    ├── predict.py            [predicts if video is fake]
 
 ---
 
