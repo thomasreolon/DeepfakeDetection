@@ -51,12 +51,12 @@ class OpenFaceAPI():
         self._check_init_files(openface_path)
 
         # Create Folder to save OpanFace results
-        self.out_dir = out_dir
+        self.out_dir = self._get_abs_path(out_dir)
         try:
             os.mkdir(out_dir)
         except OSError as err:
             try:
-                os.mkdir('/'.join(str(__file__).split('/')[:-1])+'/../../output')
+                os.mkdir('/'.join(str(__file__).split('/')[:-1])+'/../../../output')
                 os.mkdir(out_dir)
             except OSError as err:
                 if err.errno != errno.EEXIST: raise err

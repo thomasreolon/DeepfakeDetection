@@ -220,7 +220,7 @@ class DataExtractor():
 
         return res
 
-      
+
 
     def get_raw_features(self, AU_r = [], AU_c = [], pose = [], mouth_v = [], mouth_h = [], filtered = True):
         feature_r = {}
@@ -355,3 +355,13 @@ class VidDataExtractor(DataExtractor):
 
     def get_frame_std(self):
         return list(self.csv.std())
+
+    def get_frames_in_intervals(self, intervals):
+        df = self.csv
+        cond = df['frame'] == -1 # all false
+        for init, end in intervals:
+            cond |= (df['frame'] >= init) & (df['frame'] <= end)
+        df = df.loc[cond]
+        return VidDataExtractor(self.partial_path, self.openfaceAPI, df, self.hog)
+
+
