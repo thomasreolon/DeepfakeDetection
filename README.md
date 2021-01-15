@@ -3,13 +3,9 @@
 :construction::construction::construction: currently under development :construction::construction::construction:
 
 This project uses [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace.git) to analyze faces in videos.
-... future ...
+Then uses the features suggested by [Agarwal et al.](https://openaccess.thecvf.com/content_CVPRW_2019/papers/Media%20Forensics/Agarwal_Protecting_World_Leaders_Against_Deep_Fakes_CVPRW_2019_paper.pdf) to differentiate real videos of famous people from fakes.
 
 ---
-
-**TODO**s:
-:heavy_check_mark: interface to OpenFace
-:heavy_multiplication_x: detect fake videos from real ones
 
 ## Project structure:
 
@@ -30,7 +26,29 @@ This project uses [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace.git) 
 
 very brief snippets on how to start up
 
-### openface package
+### videoanalizer module
+
+This module can extract the 190 feature array described in "Protecting World Leaders Against Deep Fakes" and train your classifier.
+The following snippet shows how to do this.
+
+```python
+from videoanalizer import VideoAnalizer
+
+# Videos To Process
+files = ['a.jpg', '../folder/imgs/obama.png']
+
+# Analysis Using Openface + Correlation Extraction
+vd = VideoAnalizer()
+arrays = vd.process_video(files=files)
+
+
+print(arrays)  # [[0.42 ,0.39, ..., -0.17], [0.6 ,0.343, ..., -0.3443]]
+```
+
+This module is an interface to process videos with OpenFace easily.
+The following snippet shows how pass a video to OpenFace and extract the features we are interested in.
+
+### openface module
 
 ```python
 from openface.openfaceAPI import OpenFaceAPI
