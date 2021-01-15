@@ -1,7 +1,9 @@
+import os
 import videoanalizer.openface as openface
 import videoanalizer.openface.parts as parts
 from .samplesextractor import extract_samples
 from .covariance import get_190_features
+from videoanalizer.classifier import train_specific_person_classifier
 
 class VideoAnalizer():
     """
@@ -23,10 +25,15 @@ class VideoAnalizer():
             'vtype': 'single',       #  detect one 'single' or multiple 'multi' faces in the videos
             'out_dir': '/'.join(str(__file__).split('/')[:-1])+'/../../output/features',
         }
-        for k, v in kw.items():
-            if k in self.config:
-                self.config[k] = v
+        self.config = self._get_config(kw)
 
+    def _get_config(self, config):
+        tmp = {**self.config}
+        if (isinstance(config, dict)):
+            for k, v in config.items():
+                if k in tmp:
+                    tmp[k] = v
+        return tmp
 
     def process_video(self, files=None, fdir=None, config=None):
         """
@@ -47,8 +54,7 @@ class VideoAnalizer():
         if files is None and fdir is None:
             raise Exception('at least one between files (eg. ["../obama.mp4"]) or fdir (eg. "../videos") must be specified')
 
-        if config is None:
-            config = self.config
+        config = self._get_config(config)
 
         # process the video using openface
         res = self.api.process_video(files=files, fdir=fdir, vtype=config['vtype'])
@@ -72,3 +78,31 @@ class VideoAnalizer():
         return samples
 
 
+    def train_classifier(self, person_files, non_person_files, person_name='Real', config=None, show_trainig_performance=False):
+        """
+        input:
+            person_files is a list of folders or files that contain a person
+            person_non_files is a list folders or files that contains fakes, other people
+            person_name is the name of the person in person_files
+
+        output:
+            a classifier that can recognize person_name in videos
+        """
+        config = self._get_config(config or {'frames_per_sample':300})
+        samples = [[], []]
+        for i,f in enumerate((person_files, non_person_files)):
+
+            if (isinstance(f, str)):
+                f = [f]
+
+            files = []
+            for path in f:
+                if os.path.isdir(path):
+                    samples[i] += self.process_video(fdir=path, config=config)
+                else:
+                    files.append(path)
+            if files:
+                samples[i] += self.process_video(files=files, config=config)
+        
+        clf = train_specific_person_classifier(samples[0], samples[1], self, person_name, show_trainig_performance)
+        return clf
