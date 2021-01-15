@@ -1,4 +1,5 @@
 import os
+from joblib import dump
 import videoanalizer.openface as openface
 import videoanalizer.openface.parts as parts
 from .samplesextractor import extract_samples
@@ -23,7 +24,7 @@ class VideoAnalizer():
             'overlap': 0,            #  add overlapping samples (0->NO, 1->double, 2->triple)
             'only_success': True,    #  drop frames where openface is not confident
             'vtype': 'single',       #  detect one 'single' or multiple 'multi' faces in the videos
-            'out_dir': '/'.join(str(__file__).split('/')[:-1])+'/../../output/features',
+            'out_dir': '/'.join(str(__file__).split('/')[:-1])+'/../../output',
         }
         self.config = self._get_config(kw)
 
@@ -78,7 +79,7 @@ class VideoAnalizer():
         return samples
 
 
-    def train_classifier(self, person_files, non_person_files, person_name='Real', config=None, show_trainig_performance=False):
+    def train_classifier(self, person_files, non_person_files, person_name='Real', config=None, show_trainig_performance=False, save=False):
         """
         input:
             person_files is a list of folders or files that contain a person
@@ -105,4 +106,10 @@ class VideoAnalizer():
                 samples[i] += self.process_video(files=files, config=config)
         
         clf = train_specific_person_classifier(samples[0], samples[1], self, person_name, show_trainig_performance)
+        if (save): self.save_classifier(clf)
         return clf
+
+    def save_classifier(self,clf, fname=None, out_dir=None):
+        out_dir = out_dir or self.config['out_dir']
+        path = out_dir + f'/{fname or clf.labels_map[1]}-clf.joblib'
+        dump(clf, path)

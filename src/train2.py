@@ -33,3 +33,5 @@ if (len(os.listdir(DATA_DIR))==0):
 vd = VideoAnalizer()
 clf = vd.train_classifier(f'{DATA_DIR}/real', f'{DATA_DIR}/fake', show_trainig_performance=True)
 clf.predict_video('../test_data/vid/obama2.mp4', prints=True)
+
+vd.save_classifier(clf)
