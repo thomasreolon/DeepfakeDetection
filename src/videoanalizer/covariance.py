@@ -24,6 +24,9 @@ def get_correlation_matrix(features):
     return correlation_matrix
 
 def get_190_features(features):
+    """
+    do correlation between AUs and return unique values of the matrix
+    """
     c_mat = get_correlation_matrix(features)
     features = []
     for i in range(len(c_mat)):

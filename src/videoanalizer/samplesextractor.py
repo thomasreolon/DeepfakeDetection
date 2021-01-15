@@ -3,6 +3,10 @@ from videoanalizer.openface.output_extractor import VidDataExtractor
 
 
 def extract_samples(dx:VidDataExtractor, config:dict):
+    """
+    this function takes a data extractor and splits it as requested in config.
+    we try to have continuous samples (avoiding jumps between frames)
+    """
     if not all(setting in config for setting in ()):
         raise Exception("configs must contain 'interval', 'frames_per_sample','overlap' and 'only_success")
     intervals           = config['interval']
