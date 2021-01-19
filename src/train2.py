@@ -1,7 +1,4 @@
 import os
-from joblib import dump
-from sklearn import svm
-from sklearn.metrics import confusion_matrix
 from videoanalizer import VideoAnalizer
 from gdrive import GoogleDriveDownloader as gdd
 
@@ -32,6 +29,7 @@ if (len(os.listdir(DATA_DIR))==0):
 
 vd = VideoAnalizer()
 clf = vd.train_classifier(f'{DATA_DIR}/real', f'{DATA_DIR}/fake', show_trainig_performance=True)
-clf.predict_video('../test_data/vid/obama2.mp4', prints=True)
+label = clf.predict_video('../test_data/vid/obama2.mp4', return_label=True)
+print(label)
 
 vd.save_classifier(clf)

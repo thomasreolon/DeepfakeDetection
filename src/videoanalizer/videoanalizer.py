@@ -5,6 +5,7 @@ import videoanalizer.openface.parts as parts
 from .samplesextractor import extract_samples
 from .covariance import get_190_features
 from videoanalizer.classifier import train_specific_person_classifier
+from .plots import plot_features2D
 
 class VideoAnalizer():
     """
@@ -79,7 +80,7 @@ class VideoAnalizer():
         return samples
 
 
-    def train_classifier(self, person_files, non_person_files, person_name='Real', config=None, show_trainig_performance=False, save=False):
+    def train_classifier(self, person_files, non_person_files, person_name='Real', clf_type='OneClassSVM', config=None, show_trainig_performance=False, save=False):
         """
         input:
             person_files is a list of folders or files that contain a person
@@ -105,7 +106,7 @@ class VideoAnalizer():
             if files:
                 samples[i] += self.process_video(files=files, config=config)
         
-        clf = train_specific_person_classifier(samples[0], samples[1], self, person_name, show_trainig_performance)
+        clf = train_specific_person_classifier(samples[0], samples[1], self, person_name,clf_type, show_trainig_performance)
         if (save): self.save_classifier(clf)
         return clf
 
@@ -113,3 +114,33 @@ class VideoAnalizer():
         out_dir = out_dir or self.config['out_dir']
         path = out_dir + f'/{fname or clf.labels_map[1]}-clf.joblib'
         dump(clf, path)
+
+
+    def plot_features(self, fdir, plot_type='PCA', config=None):
+        """
+        fdir is a folder containing subfolders that contains the videos. 
+        Each subforlder will have a different color in the plot..
+    
+        fdir
+         |-- obama
+         |     |---video1.mp4
+         |     |---video2.mp4
+         |-- trump
+         |     |---trump.mp4
+         |     |---file.mp4
+        
+        """
+        config = self._get_config(config or {'frames_per_sample':300})
+        subfolders = os.listdir(fdir)
+        samples = []
+
+        for folder in subfolders:
+            path = f'{fdir}/{folder}'
+            x = self.process_video(fdir=path, config=config)
+            samples.append(x)
+
+        plot_features2D(samples, subfolders, plot_type)
+
+        
+
+
