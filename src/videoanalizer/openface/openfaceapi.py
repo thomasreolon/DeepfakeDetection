@@ -20,7 +20,7 @@
 
 import errno
 import os
-import videoanalizer.openface.output_extractor as output_extractor
+from . import output_extractor
 from . import errors as M
 from .installer import install_openface
 
@@ -34,7 +34,7 @@ class OpenFaceAPI():
     def __init__(self, openface_path:str=None, out_dir:str=None):
         if out_dir is None:
             out_dir = '/'.join(str(__file__).split('/')[:-1])+'/../../../output/openfacesaves'
-        
+
         if openface_path is None:
             openface_path = '/'.join(str(__file__).split('/')[:-1])+'/OpenFace'
             try:
