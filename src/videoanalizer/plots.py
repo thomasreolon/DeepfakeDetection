@@ -1,22 +1,38 @@
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.decomposition import PCA
 import random
+matplotlib.use('Agg')
 
 colors = ['#ff5733', '#ff9333','#ffca33','#fff033','#b1cf29','#b24516','#b68e51','#8b2c00','#ff1212','#ff7e95','#ff7ec2','#fa2d65','#fa2da6','#a5013f',]
 random.shuffle(colors)
+iteration = 0
 
-def plot_features2D(data, labels, ptype='PCA'):
+# removes NaN and infinites from the data
+def clean(data):
+    X, Y = [], []
+    for i,d in enumerate(data):
+        for x in d:
+            x = np.array(x, dtype='float64')
+            if np.isfinite(x).all():
+                X.append(x)
+                Y.append(i)
+    return np.array(X, dtype='float64'), Y
+
+
+# saves the plot of the features
+def plot_features2D(data,out_dir, labels, ptype='PCA'):
     """
     data is a list of (list of samples)
-    ttype can be choosen between PCA and LDA 
+    type can be choosen between PCA and LDA 
     """
-    X=[]
-    y=[]
-    for i,d in enumerate(data):
-        X+=d
-        y+=[i for _ in range(len(d))]
+    global iteration
+    iteration +=1
+    
+    # get X as a list of points and y as their label
+    X,y = clean(data)
 
     # type of projection
     n_components=2
@@ -29,9 +45,14 @@ def plot_features2D(data, labels, ptype='PCA'):
     clf.fit(X, y)
 
     # plot results
-    plt.title('PCA')
+    tit = f'{ptype} {len(labels)} {labels[0]}'
+    plt.title(tit)
     for d,c,l,i in zip(data,colors,labels,list(range(20))):
-        coords = np.array(clf.transform(d))
+        clean_d = []
+        for x in d:
+            if (np.isfinite(np.array(x,dtype='float64')).all()):
+                clean_d.append(x)
+        coords = np.array(clf.transform(clean_d))
         if (n_components==2):
             plt.scatter(coords[:,0], coords[:,1], color=c, label=l, alpha=0.7)
         else:
@@ -40,7 +61,8 @@ def plot_features2D(data, labels, ptype='PCA'):
     if (n_components==1):
         plt.ylim((-3,3+len(data)))
     plt.legend()
-    plt.show()
+    plt.savefig(f'{out_dir}/{iteration}-{tit}.png')
+    plt.clf()
 
 
 

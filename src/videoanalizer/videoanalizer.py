@@ -116,30 +116,41 @@ class VideoAnalizer():
         dump(clf, path)
 
 
-    def plot_features(self, fdir, plot_type='PCA', config=None):
+    def plot_features(self, folders_list, root_dir=None, labels=None, plot_type='PCA', config=None):
         """
-        fdir is a folder containing subfolders that contains the videos. 
-        Each subforlder will have a different color in the plot..
-    
-        fdir
-         |-- obama
-         |     |---video1.mp4
-         |     |---video2.mp4
-         |-- trump
-         |     |---trump.mp4
-         |     |---file.mp4
-        
+        folders_list is a list of list of folders. each folder contains videos. 
+        each list of folders will have the same label.
+        root_dir is the relative path to the folders.
+
+        videos
+        |--obama1
+            |----vid1.mp4
+            |----vid2.mp4
+        |--obama2
+            |----vid0.mp4
+        |--fakeobama
+            |----fake.mp4
+
+
+        plot_features(folders_list=[[obama1, obama2], [fakeobama]], rootdir='./videos', labels=['obama', 'fake'])
+
         """
         config = self._get_config(config or {'frames_per_sample':300})
-        subfolders = os.listdir(fdir)
-        samples = []
+        samples, fold_names = [], []
+        fold = 'unlabeled'
+        root_dir = root_dir and (root_dir+'/') or ''
 
-        for folder in subfolders:
-            path = f'{fdir}/{folder}'
-            x = self.process_video(fdir=path, config=config)
-            samples.append(x)
+        for folders in folders_list:
+            tmp=[]
+            for fold in folders:
+                fdir = f'{root_dir}{fold}'
+                tmp += self.process_video(fdir=fdir, config=config)
+            samples.append(tmp)
+            fold_names.append(fold)
+            
+        out_dir = self.config['out_dir']
 
-        plot_features2D(samples, subfolders, plot_type)
+        plot_features2D(samples, out_dir, labels or fold_names, plot_type, )
 
         
 
