@@ -59,15 +59,26 @@ folders_list=[
     ['fake/QueenElisabeth'],
 ]
 vd.plot_features(folders_list=folders_list, root_dir=root_dir)
+vd.plot_features(folders_list=folders_list, root_dir=root_dir, plot_type='LDA')
+
+
+# real fake features in 2D for many subjects
+folders_list=[
+    ['real/Mattarella', 'real/ElonMusk', 'real/Obama', 'real/Renzi', 'real/QueenElisabeth'],
+    ['fake/Mattarella', 'fake/Renzi', 'fake/Obama', 'fake/ElonMusk', 'fake/QueenElisabeth'],
+]
+vd.plot_features(folders_list=folders_list, root_dir=root_dir)
+vd.plot_features(folders_list=folders_list, root_dir=root_dir, plot_type='LDA')
 
 
 
 # Plot challenge real videos vs challenge fake videos
 folders_list=[
-    ['real/challenge/'+x for x in os.listdir(f'{root_dir}/real/challenge')],
-    ['fake/challenge/'+x for x in os.listdir(f'{root_dir}/real/challenge')],
+    ['real/__challenge/'+x for x in os.listdir(f'{root_dir}/real/__challenge')],
+    ['fake/__challenge/'+x for x in os.listdir(f'{root_dir}/real/__challenge')],
 ]
 labels = ['Real Challenge Videos', 'Fake Challenge Videos']
 vd.plot_features(folders_list=folders_list, root_dir=root_dir, labels=labels, plot_type='LDA')
+vd.plot_features(folders_list=folders_list, root_dir=root_dir, labels=labels, plot_type='PCA')
 
 

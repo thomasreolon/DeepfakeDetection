@@ -43,8 +43,9 @@ def plot_features2D(data,out_dir, labels, ptype='PCA'):
     clf.fit(X, y)
 
     # plot results
-    tit = f'{ptype} {len(labels)} {labels[0]}'
+    tit = f'{ptype} {len(labels)} {labels[0]}'.replace('/', '-')
     plt.title(tit)
+    data_result = []
     for d,c,l,i in zip(data,colors,labels,list(range(20))):
         clean_d = []
         for x in d:
@@ -55,19 +56,12 @@ def plot_features2D(data,out_dir, labels, ptype='PCA'):
             plt.scatter(coords[:,0], coords[:,1], color=c, label=l, alpha=0.7)
         else:
             plt.scatter(coords[:,0], np.zeros_like(coords[:,0])+i, color=c, label=l, alpha=0.7)
-
+        data_result.append(coords)
     if (n_components==1):
         plt.ylim((-3,3+len(data)))
     plt.legend()
-    plt.savefig(f'{out_dir}/{tit}.png')
+    plt.savefig(f'{out_dir}/{tit}.png')           # save plot
     plt.clf()
-
-
-
-
-
-
-
-
+    np.save(f'{out_dir}/{tit}.array', data_result)# save low dimensional space
 
 

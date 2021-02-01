@@ -166,14 +166,13 @@ class OpenFaceAPI():
             paths = [f.split('/')[-1] for f in files]
             src = ' '.join([f'-f {f}' for f in files if f[-4:] in formats])
 
-        # if src is short->no files were found.... error
         if len(src)<=6 and len(res)==0:
+            # if src is short->no files were found.... error
             raise Exception(M.EXE_PROCESS_VID_FILES)
-
-        cmd = f"{self.exe_path}/{exe} {src} -out_dir {out_dir} {add_param}"
-
-        # execute it
-        os.system(cmd)
+        elif len(src)>6:
+            # execute command if some videos were not in cache
+            cmd = f"{self.exe_path}/{exe} {src} -out_dir {out_dir} {add_param}"
+            os.system(cmd)
 
         while more:
             files = more[:100]
@@ -187,6 +186,9 @@ class OpenFaceAPI():
             # remove folder of output images (not used after)
             if (os.path.exists(p_path+'_aligned')):
                 os.system(f'rm -r {p_path}_aligned')
+            if (os.path.exists(p_path+'.avi')):
+                os.system(f'rm -r {p_path}.avi {p_path}_of_details.txt')
+
             # get result
             res[p] = output_extractor.VidDataExtractor(p_path, self)
 
