@@ -66,7 +66,10 @@ class OpenFaceAPI():
         Function used to compute landmarks of images and saves the results in out_dir
         input:
             files(list of .jpg .png .bmp .jpeg files)
+            fdir(string that represents a folder containing the videos)
+            bboxdir(borderbox for videos, see OpenFace API)
             out_dir(path where output is stored)
+
 
         output:
             dict( filename-->class_for_extracting_data_from_that_filename )
@@ -116,8 +119,16 @@ class OpenFaceAPI():
         Function used to compute landmarks of videos and saves the results in out_dir
 
         input:
+            files(list of .jpg .png .bmp .jpeg files)
+            fdir(string that represents a folder containing the videos)
+            vtype('multi' | 'single'    (number of people in the video))
+            add_param(additional configurations for OpenFace API)
+            out_dir(path where output is stored)
 
-            vtype= 'multi' | 'single'    (number of people in the video)
+            Note: use only one between files & fdir
+
+        output:
+            dict( filename-->class_for_extracting_data_from_that_filename )
         """
         res = {}
         if files is None and fdir is None:
@@ -138,17 +149,17 @@ class OpenFaceAPI():
 
         # get files parameters
         formats = ('.avi', '.mp4')
-        if fdir:   # and vtype=='single':  # ----> commenting allows the use of cache
+        more=None
+        if fdir:
             fdir = self._get_abs_path(fdir)
             files = os.listdir(fdir)
             files = self._non_in_cache(files, res, output_extractor.VidDataExtractor)
             files = [f'-f {f}' for f in files if f[-4:] in formats]
             paths = [f for f in os.listdir(fdir) if f[-4:] in formats]
+            if (len(files)>100):
+                more  = files[100:]
+                files = files[:100]
             src = f"-inroot {fdir} {' '.join(files)}"
-        elif fdir:
-            fdir = self._get_abs_path(fdir)
-            paths = [f for f in os.listdir(fdir) if f[-4:] in formats]
-            src = f'-fdir {fdir}'
         else:
             files = [self._get_abs_path(f) for f in files]
             files = self._non_in_cache(files, res, output_extractor.VidDataExtractor)
@@ -164,8 +175,19 @@ class OpenFaceAPI():
         # execute it
         os.system(cmd)
 
+        while more:
+            files = more[:100]
+            more  = files[100:]
+            src = f"-inroot {fdir} {' '.join(files)}"
+            cmd = f"{self.exe_path}/{exe} {src} -out_dir {out_dir} {add_param}"
+            os.system(cmd)
+
         for p in paths:
             p_path = os.path.join(out_dir, p.split('.')[0])
+            # remove folder of output images (not used after)
+            if (os.path.exists(p_path+'_aligned')):
+                os.system(f'rm -r {p_path}_aligned')
+            # get result
             res[p] = output_extractor.VidDataExtractor(p_path, self)
 
         return res

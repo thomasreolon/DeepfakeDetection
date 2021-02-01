@@ -8,7 +8,7 @@ matplotlib.use('Agg')
 
 colors = ['#ff5733', '#ff9333','#ffca33','#fff033','#b1cf29','#b24516','#b68e51','#8b2c00','#ff1212','#ff7e95','#ff7ec2','#fa2d65','#fa2da6','#a5013f',]
 random.shuffle(colors)
-iteration = 0
+ 
 
 # removes NaN and infinites from the data
 def clean(data):
@@ -28,8 +28,6 @@ def plot_features2D(data,out_dir, labels, ptype='PCA'):
     data is a list of (list of samples)
     type can be choosen between PCA and LDA 
     """
-    global iteration
-    iteration +=1
     
     # get X as a list of points and y as their label
     X,y = clean(data)
@@ -61,7 +59,7 @@ def plot_features2D(data,out_dir, labels, ptype='PCA'):
     if (n_components==1):
         plt.ylim((-3,3+len(data)))
     plt.legend()
-    plt.savefig(f'{out_dir}/{iteration}-{tit}.png')
+    plt.savefig(f'{out_dir}/{tit}.png')
     plt.clf()
 
 

@@ -1,4 +1,4 @@
-from videoanalizer.openface.output_extractor import VidDataExtractor
+from .openface.output_extractor import VidDataExtractor
 
 
 
@@ -34,6 +34,8 @@ def extract_samples(dx:VidDataExtractor, config:dict):
     n_samples = int(len(frames)//fps + (len(frames)%fps==0 and 0 or 1))
     points = [x for x in range(n_samples)]
     for i,jump in enumerate(reversed(jumps)):
+        if (i==n_samples):
+            break
         points[-(i+1)] = jump+1
     
     # get points in the analysys (every fps frames)

@@ -1,10 +1,10 @@
 import os
 from joblib import dump
-import videoanalizer.openface as openface
-import videoanalizer.openface.parts as parts
+from .openface import OpenFaceAPI
+from .openface import parts
 from .samplesextractor import extract_samples
 from .covariance import get_190_features
-from videoanalizer.classifier import train_specific_person_classifier
+from .classifier import train_specific_person_classifier
 from .plots import plot_features2D
 
 class VideoAnalizer():
@@ -17,7 +17,7 @@ class VideoAnalizer():
     """
     def __init__(self, **kw):
         openface_out_dir = '/'.join(str(__file__).split('/')[:-1])+'/../../output/openfacesaves'
-        self.api = openface.OpenFaceAPI(out_dir=openface_out_dir)      # use openfaceAPI to process videos at low level
+        self.api = OpenFaceAPI(out_dir=openface_out_dir)      # use openfaceAPI to process videos at low level
         # Default configs
         self.config = {
             'interval':[(0,1e20)],   #  intervals of frame to use, default: whole video
