@@ -1,5 +1,7 @@
 import numpy as np
 
+CORRELATION_LABELS=[]
+
 def pearson_correlation(X, Y):
     covariance = np.cov(X,Y)[0][1]
     X_std = np.std(X)
@@ -10,8 +12,17 @@ def pearson_correlation(X, Y):
         pc = covariance/(X_std*Y_std)
     return round(pc, 4)
 
+def update_labels(features):
+    #global CORRELATION_LABELS
+    if len(CORRELATION_LABELS)==0:
+        features = list(features.keys())
+        for i in range(len(features)):
+            for j in range(i+1, len(features)):
+                CORRELATION_LABELS.append(f'{features[i]} π {features[j]}')
+
 
 def get_correlation_matrix(features):
+    update_labels(features)
     correlation_matrix = []
 
     for f0 in features:
@@ -34,3 +45,5 @@ def get_190_features(features):
             if (i<j):
                 features.append(c_mat[i][j])
     return features
+
+

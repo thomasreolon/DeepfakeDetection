@@ -11,7 +11,7 @@ folders_list=[
     ['fake/other']
 ]
 labels = ['Real YT Videos', 'Fake YT Videos']
-vd.plot_features(folders_list=folders_list, root_dir=root_dir, labels=labels, plot_type='LDA')
+vd.plot_features(folders_list=folders_list, root_dir=root_dir, labels=labels, plot_type='PCA')
 
 
 # Plot Obama real videos vs Obama fake videos  (LDA)
@@ -82,3 +82,4 @@ vd.plot_features(folders_list=folders_list, root_dir=root_dir, labels=labels, pl
 vd.plot_features(folders_list=folders_list, root_dir=root_dir, labels=labels, plot_type='PCA')
 
 
+print("THE END!")
