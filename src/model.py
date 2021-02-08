@@ -2,9 +2,9 @@ import os, pathlib, math
 from sklearn.svm import LinearSVC
 from videoanalizer import VideoAnalizer
 from sklearn import metrics
+from sklearn.neural_network import MLPClassifier
 
 PERSON = 'Obama'
-TEST_PERC = 0.3
 
 def filter_features(features):
     features_new = features[:]
@@ -15,46 +15,39 @@ def filter_features(features):
                 break
     return features_new
 
-path_fake = f'../test_data/videos/fake/{PERSON}'
-path_real = f'../test_data/videos/real/{PERSON}'
+path_training_fake = f'../test_data/videos/fake/{PERSON}/test'
+path_training_real = f'../test_data/videos/real/{PERSON}/test'
+path_test_fake = f'../test_data/videos/fake/{PERSON}/training'
+path_test_real = f'../test_data/videos/real/{PERSON}/training'
 
 vd = VideoAnalizer()
 
 config = {'frames_per_sample':300}
-features_real = vd.process_video(fdir=path_real, config=config)
-features_fake = vd.process_video(fdir=path_fake, config=config)
+features_training_real = vd.process_video(fdir=path_training_real, config=config)
+features_training_fake = vd.process_video(fdir=path_training_fake, config=config)
+features_test_real = vd.process_video(fdir=path_test_real, config=config)
+features_test_fake = vd.process_video(fdir=path_test_fake, config=config)
 
-features_real = filter_features(features_real)
-features_fake = filter_features(features_fake)
+features_training_real = filter_features(features_training_real)
+features_training_fake = filter_features(features_training_fake)
+features_test_real = filter_features(features_test_real)
+features_test_fake = filter_features(features_test_fake)
 
-class_real = ['real' for i in range(0,len(features_real))]
-class_fake = ['fake' for i in range(0,len(features_fake))]
+class_training_real = ['real' for i in range(0,len(features_training_real))]
+class_training_fake = ['fake' for i in range(0,len(features_training_fake))]
+class_test_real = ['real' for i in range(0,len(features_test_real))]
+class_test_fake = ['fake' for i in range(0,len(features_test_fake))]
 
-slice_real = int(len(features_real)*(1-TEST_PERC))
-slice_fake = int(len(features_fake)*(1-TEST_PERC))
+training_features = features_training_real + features_training_fake
+training_labels = class_training_real + class_training_fake
 
-training_features_real = features_real[0:slice_real]
-training_labels_real = class_real[0:slice_real]
-training_features_fake = features_fake[0:slice_fake]
-training_labels_fake = class_fake[0:slice_fake]
+test_features = features_test_real + features_test_fake
+test_labels = class_test_real + class_test_fake
 
-test_features_real = features_real[slice_real:]
-test_labels_real = class_real[slice_real:]
-test_features_fake = features_fake[slice_fake:]
-test_labels_fake = class_fake[slice_fake:]
+MLP = LinearSVC()
 
-training_features = training_features_real + training_features_fake
-training_labels = training_labels_real + training_labels_fake
+MLP.fit(training_features, training_labels)
 
-test_features = test_features_real + test_features_fake
-test_labels = test_labels_real + test_labels_fake
-
-svc = LinearSVC()
-
-print(training_features)
-
-svc.fit(training_features, training_labels)
-
-predicted = svc.predict(test_features)
+predicted = MLP.predict(test_features)
 
 print(metrics.classification_report(test_labels, predicted))
