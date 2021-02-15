@@ -105,7 +105,7 @@ class VideoAnalizer():
                     files.append(path)
             if files:
                 samples[i] += self.process_video(files=files, config=config)
-        
+
         clf = train_specific_person_classifier(samples[0], samples[1], self, person_name,clf_type, show_trainig_performance)
         if (save): self.save_classifier(clf)
         return clf
@@ -118,7 +118,7 @@ class VideoAnalizer():
 
     def plot_features(self, folders_list, root_dir=None, labels=None, plot_type='PCA', config=None):
         """
-        folders_list is a list of list of folders. each folder contains videos. 
+        folders_list is a list of list of folders. each folder contains videos.
         each list of folders will have the same label.
         root_dir is the relative path to the folders.
 
@@ -147,11 +147,7 @@ class VideoAnalizer():
                 tmp += self.process_video(fdir=fdir, config=config)
             samples.append(tmp)
             fold_names.append(fold)
-            
+
         out_dir = self.config['out_dir']
 
         plot_features2D(samples, out_dir, labels or fold_names, plot_type, )
-
-        
-
-
