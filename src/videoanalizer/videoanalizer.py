@@ -3,7 +3,7 @@ from joblib import dump
 from .openface import OpenFaceAPI
 from .openface import parts
 from .samplesextractor import extract_samples
-from .covariance import get_190_features
+from .covariance import get_190_features, get_rich_features
 from .classifier import train_specific_person_classifier
 from .plots import plot_features2D
 
@@ -37,7 +37,7 @@ class VideoAnalizer():
                     tmp[k] = v
         return tmp
 
-    def process_video(self, files=None, fdir=None, config=None):
+    def process_video(self, files=None, fdir=None, config=None, rich=False):
         """
         returns a list of array where each array contains the 190 features.
         number of arrays = sum_video [ n_frames(get_only_frames_in(video, interval))/frames_per_sample ]
@@ -68,13 +68,15 @@ class VideoAnalizer():
 
         # get the 20 features used in the paper for each sample
         samples = []
-        for s_dx in dx_samples:
-            features = s_dx.get_raw_features(AU_r = parts.AU_paper_r,
-                                  AU_c = parts.AU_paper_c,
-                                  pose = parts.POSE_ROTATION_X_Z,
-                                  mouth_h = parts.MOUTH_H,
-                                  mouth_v = parts.MOUTH_V)
-            features = get_190_features(features)
+        for s_dx in dx_samples:            
+            raw_features = s_dx.get_raw_features(AU_r = parts.AU_paper_r,
+                                AU_c = parts.AU_paper_c,
+                                pose = parts.POSE_ROTATION_X_Z,
+                                mouth_h = parts.MOUTH_H,
+                                mouth_v = parts.MOUTH_V)
+            features = get_190_features(raw_features)
+            if rich:
+                features += get_rich_features(raw_features)
             samples.append(features)
 
         return samples

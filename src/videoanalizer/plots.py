@@ -56,6 +56,7 @@ def plot_features2D(data,out_dir, labels, ptype='PCA'):
         if (n_components==2):
             plt.scatter(coords[:,0], coords[:,1], color=c, label=l, alpha=0.7)
         else:
+            print('\\\\\\\\\\\\\n',coords,'\n............\n',coords[:,0])
             plt.scatter(coords[:,0], np.zeros_like(coords[:,0])+i, color=c, label=l, alpha=0.7)
         data_result.append(coords)
     if (n_components==1):

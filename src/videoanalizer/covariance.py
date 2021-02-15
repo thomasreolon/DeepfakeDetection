@@ -1,6 +1,7 @@
 import numpy as np
 
 CORRELATION_LABELS=[]
+ALL_LABELS=[]
 
 def pearson_correlation(X, Y):
     covariance = np.cov(X,Y)[0][1]
@@ -46,4 +47,24 @@ def get_190_features(features):
                 features.append(c_mat[i][j])
     return features
 
+def get_rich_features(features):
+    #global ALL_LABELS
+    if len(ALL_LABELS)==0:
+        update_labels(features)
+        for f in CORRELATION_LABELS:
+            ALL_LABELS.append(f)
+        for f in features.keys():
+            ALL_LABELS.append(f'avg.{f}')
+            ALL_LABELS.append(f'std.{f}')
+            ALL_LABELS.append(f'max {f}')
 
+    X = []
+    for _, val in features.items():
+        if len(val)>0:
+            ma  = np.max(val)
+            av  = np.average(val)
+            std = np.std(val)
+        else:
+            ma, av, std = 0., 0., 0.
+        X += [av, std, ma]
+    return X

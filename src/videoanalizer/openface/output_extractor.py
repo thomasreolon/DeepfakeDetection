@@ -33,7 +33,11 @@ class DataExtractor():
         self.face_col         = 'face'
         self.to_maintain      = ['confidence']
         self.to_remove        = []
+    
 
+    def __len__(self):
+        """returns how many rows there are  =  n_people*n_frames"""
+        return len(self.csv.index)
 
 
     def get_hog(self):
@@ -335,7 +339,6 @@ class VidDataExtractor(DataExtractor):
         self.face_col         = 'face_id'
         self.to_maintain      = ['face_id', 'frame', 'confidence','timestamp','success']  # to maintain in the new df
         self.to_remove        = ['face_id', 'frame', 'confidence','timestamp','success']  # exclude when getting features
-
 
     def get_frame(self, frame:int):
         """Returns a DataExtractor filtered by csv[frame] == frame"""

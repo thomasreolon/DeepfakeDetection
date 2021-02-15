@@ -13,6 +13,17 @@ folders_list=[
 labels = ['Real YT Videos', 'Fake YT Videos']
 vd.plot_features(folders_list=folders_list, root_dir=root_dir, labels=labels, plot_type='PCA')
 
+exit(0)
+
+# Plot real videos from YT vs fake videos from YT
+folders_list=[
+    ['real/other'],
+    ['fake/other']
+]
+labels = ['Real YT Videos', 'Fake YT Videos']
+vd.plot_features(folders_list=folders_list, root_dir=root_dir, labels=labels, plot_type='LDA')
+vd.plot_features(folders_list=folders_list, root_dir=root_dir, labels=labels, plot_type='PCA')
+
 
 # Plot Obama real videos vs Obama fake videos  (LDA)
 folders_list=[
@@ -20,7 +31,7 @@ folders_list=[
     ['fake/Obama'],
 ]
 labels = ['Real Obama Videos', 'Fake Obama Videos']
-vd.plot_features(folders_list=folders_list, root_dir=root_dir, labels=labels, plot_type='LDA')
+vd.plot_features(folders_list=folders_list, root_dir=root_dir, labels=labels, plot_type='PCA')
 
 
 
@@ -31,6 +42,7 @@ folders_list=[
 ]
 labels = ['Real Elon Musk Videos', 'Fake Elon Musk Videos']
 vd.plot_features(folders_list=folders_list, root_dir=root_dir, labels=labels, plot_type='PCA')
+vd.plot_features(folders_list=folders_list, root_dir=root_dir, labels=labels, plot_type='LDA')
 
 
 # Plot Elon real/fake videos vs Obama's (LDA)

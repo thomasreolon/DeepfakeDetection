@@ -56,7 +56,8 @@ def extract_samples(dx:VidDataExtractor, config:dict):
     samples_dx = []
     for i in points:
         tmp = dx.get_frames_in_intervals([(i, i+fps)])
-        samples_dx.append(tmp)
+        if len(tmp)>0:
+            samples_dx.append(tmp)
 
     return samples_dx
     
