@@ -4,8 +4,7 @@ from gdrive import GoogleDriveDownloader as gdd
 os.chdir(pathlib.Path(__file__).parent.absolute())
 
 DATA_DIR = '../test_data'
-SAVE_CLF_PATH = '../output/fake-real.joblib'
-GDRIVE_CODE = '1JZ0lvEQmyXAxjJSZLFRx6WfF1w17NX6c'
+GDRIVE_CODE = '1La_4SVYRNT8ePgLzZGwlxuY1V9x989DC'
 
 
 ######## Create Directory & Download Videos
