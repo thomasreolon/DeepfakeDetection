@@ -2,7 +2,6 @@ import os, pathlib, math
 from sklearn.svm import LinearSVC
 from videoanalizer import VideoAnalizer
 from sklearn import metrics
-from sklearn.neural_network import MLPClassifier
 
 PERSON = 'Obama'
 
@@ -15,18 +14,19 @@ def filter_features(features):
                 break
     return features_new
 
-path_training_fake = f'../test_data/videos/fake/{PERSON}/test'
-path_training_real = f'../test_data/videos/real/{PERSON}/test'
-path_test_fake = f'../test_data/videos/fake/{PERSON}/training'
-path_test_real = f'../test_data/videos/real/{PERSON}/training'
+path_fake = f'../test_data/videos/fake/{PERSON}'
+path_real = f'../test_data/videos/real/{PERSON}'
 
 vd = VideoAnalizer()
 
+# extract features
 config = {'frames_per_sample':300}
-features_training_real, _ = vd.process_video(fdir=path_training_real, config=config)
-features_training_fake, _ = vd.process_video(fdir=path_training_fake, config=config)
-features_test_real, _ = vd.process_video(fdir=path_test_real, config=config)
-features_test_fake, _ = vd.process_video(fdir=path_test_fake, config=config)
+features_real, id_r = vd.process_video(fdir=path_real, config=config)
+features_fake, id_f = vd.process_video(fdir=path_fake, config=config)
+
+# split train test
+features_training_real, features_test_real = vd.split_train_test(features_real, id_r)
+features_training_fake, features_test_fake = vd.split_train_test(features_fake, id_f)
 
 features_training_real = filter_features(features_training_real)
 features_training_fake = filter_features(features_training_fake)
