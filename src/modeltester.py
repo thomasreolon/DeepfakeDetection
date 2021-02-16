@@ -7,23 +7,24 @@ from sklearn.svm import SVC
 from sklearn.metrics import confusion_matrix
 from videoanalizer import VideoAnalizer
 from videoanalizer.covariance import ALL_LABELS
+import json
 
 os.chdir(pathlib.Path(__file__).parent.absolute()) # for debugging
 
 # 1 get dataset
-def get_dataset(vd, real_dir, fake_dir, rich=False):
-    config = {'frames_per_sample':1000}
+def get_dataset(vd, real_dir, fake_dir, rich=False, fps=1000):
+    config = {'frames_per_sample':fps}
     # Real features
     X_r, vids = vd.process_video(fdir=real_dir, config=config, rich=rich)
     if len(X_r)<100:
-        config = {'frames_per_sample':max(10*len(X_r),300)}
+        config = {'frames_per_sample':max(int(fps/100*len(X_r)),300)}
         X_r, vids = vd.process_video(fdir=real_dir, config=config, rich=rich)
     X_r_train, X_r_test = vd.split_train_test(X_r, vids)
     
     # Fake Features
     X_f, vids = vd.process_video(fdir=fake_dir, config=config, rich=rich)
     if (len(X_r)>2*len(X_f)):
-        config = {'frames_per_sample':max(10*len(X_f),250)}
+        config = {'frames_per_sample':max(int(fps/100*len(X_f)),250)}
         X_r, vids = vd.process_video(fdir=fake_dir, config=config, rich=rich)
     X_f_train, X_f_test = vd.split_train_test(X_r, vids)
 
@@ -101,12 +102,13 @@ def feature_selector(X,y, sel_type=0, override=False):
             SELECTOR_CACHE['lda'] = lda
         SELECTOR_CACHE['good'] = good_features
     else:
-        pca = SELECTOR_CACHE['pca']
-        lda = SELECTOR_CACHE['lda']
+        if sel_type>1:
+            pca = SELECTOR_CACHE['pca']
+            lda = SELECTOR_CACHE['lda']
         good_features=SELECTOR_CACHE['good']
-
-    X_2 = pca.fit_transform(X)
-    X_3 = lda.fit_transform(X, y)
+    if sel_type>1:
+        X_2 = pca.fit_transform(X)
+        X_3 = lda.fit_transform(X, y)
 
     ## Select only features with best scores
     new_X = []
@@ -170,10 +172,12 @@ class CLFBoost(CLF):
         ypred2 = self.clf2.predict(X)
         # CLF3
         X3,y3=[],[]
+        onefake,onereal=False, False
         for x, yp2, yp, yt in zip(X, ypred2, ypred, y):
-            if yp!=yp2:
+            if yp!=yp2 or random.random()>0.4:
                 X3.append(x)
                 y3.append(yt)
+                
         self.clf3.fit(X3, y3)
     def predict(self, X):
         res = []
@@ -209,42 +213,80 @@ class CLFSVM(CLF):
    
 
 # INIT
-REAL='../test_data/videos/real/Obama'
-FAKE='../test_data/videos/fake/Obama'
+PATH='../test_data/videos/{}/{}'
+ENDC, OKCYAN, OKGREEN = '\033[0m', '\033[96m', '\033[92m'
+
+
 vd = VideoAnalizer()
-RICH=True
-SEL_TYPE = 2
+what_features_are_selected = {}
+avg_model_precision = {}
+best3_models = [(0,'None'), (0,'None'), (0,'None')]
 
-x_train, y_train, x_test, y_test = get_dataset(vd, REAL, FAKE, rich=RICH)
-# Train
-x_train, y_train, gf = feature_selector(x_train, y_train,sel_type=SEL_TYPE, override=True)
+for person in ['Obama']:    # for different people
+    REAL_PATH = PATH.format('real', person)
+    FAKE_PATH = PATH.format('fake', person)
+    for iteration in (0,1,2):           # split dataset in 3 different ways
+        for rich in (True, False):      # with 190 features, with 250 features
+            x_train, y_train, x_test, y_test = get_dataset(vd, REAL_PATH, FAKE_PATH, rich=rich, fps=300+iteration*200)
 
-c1 = CLFPaper()
-c1.fit(x_train, y_train)
-c2 = CLFBoost()
-c2.fit(x_train, y_train)
+            for selector in (0,1,2):    # train with full features, a subset, a subset+pca+lda
+                x_train, y_train, gf = feature_selector(x_train, y_train,sel_type=selector, override=True)
+                x_test, y_test, gf = feature_selector(x_test, y_test,sel_type=selector)
+                for f_id in gf:
+                    if f_id in what_features_are_selected:
+                        what_features_are_selected[f_id] += 1
+                    else:
+                        what_features_are_selected[f_id] = 1
 
+                for Clf in (CLFPaper, CLFBoost, CLFLinear, CLFSVM): #for different models
+                    clf = Clf()
+                    clf.fit(x_train, y_train)
+                    y_pred = clf.predict(x_test)
 
-# Test
+                    c_mat = confusion_matrix(y_test, y_pred, labels=[1,-1])
+                    print(f'\n{OKCYAN}iteration:{iteration},rich:{rich},selector:{selector},model:{clf.name}{ENDC}')
+                    print(c_mat)
+                    
+                    # update models with best persormance
+                    avg_precision = (c_mat[0][0]/(c_mat[0][0]+c_mat[0][1])+c_mat[1][1]/(c_mat[1][1]+c_mat[1][0]))/2
+                    if best3_models[0][0] < avg_precision:
+                        best3_models[0]=(avg_precision, clf.name)
+                        for i in (1,2):
+                            if best3_models[i][0] < best3_models[0][0]:
+                                tmp             = best3_models[i]
+                                best3_models[i] = best3_models[0]
+                                best3_models[0] = tmp
+                    
+                    # update avg. conf matrix
+                    if clf.name in avg_model_precision:
+                        avg_model_precision[clf.name] += c_mat
+                    else:
+                        avg_model_precision[clf.name] = np.array(c_mat)
 
-x_test, y_test, gf = feature_selector(x_test, y_test,sel_type=SEL_TYPE)
+print(f'{OKGREEN}WHAT FEATURES ARE SELECTED:{ENDC}')
+wfs = list(what_features_are_selected.items())
+wfs.sort(reverse=True, key=lambda k: k[1])
+for f_id, count in wfs:
+    print(f'  {ALL_LABELS[f_id]}({f_id}): {count}')
 
-y_pred1 = c1.predict(x_test)
-y_pred2 = c2.predict(x_test)
+print(f'\n{OKGREEN}SUM OF CONF. MATRICES FOR EACH MODEL:{ENDC}')
+tmp = {k:[str(v[0]), str(v[1])] for k,v in avg_model_precision.items()}
+print(json.dumps(tmp, indent=2))
 
-print('CONF MATRIX C1')
-print(confusion_matrix(y_test, y_pred1))
-
-
-print('CONF MATRIX C2')
-print(confusion_matrix(y_test, y_pred2))
-
-
+print(f'\n{OKGREEN}THE MODELS THAT HAD THE BEST AVG. PRECISION:{ENDC}')
+print(json.dumps(best3_models, indent=2))
 
 """
 _____________________________________________________________________________________________
-False, 0
 
+
+
+
+PREVIOUS EXPERIMENTS SHOWED GOOD RESULTS:
+- using 250 features instead of 190
+- using 250 features and reducing them with LDA, SFS, ...
+
+rich:False, selector:0
 CONF MATRIX C1
 [[5 9]
  [9 7]]

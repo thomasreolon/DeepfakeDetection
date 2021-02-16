@@ -1,4 +1,4 @@
-import os, random
+import os, random, numpy as np
 from joblib import dump
 from .openface import OpenFaceAPI
 from .openface import parts
@@ -61,26 +61,24 @@ class VideoAnalizer():
         # process the video using openface
         res = self.api.process_video(files=files, fdir=fdir, vtype=config['vtype'])
 
-        # divide the video into samples
-        dx_samples, videoids, vid = [], [], 0
-        for _, dx in res.items():
-            tmp = extract_samples(dx, config)
-            dx_samples += tmp
-            videoids   += [vid for _ in range(len(tmp))]
+        # divide the videos into samples, then extract the features from each sample
+        samples, videoids, vid = [], [], 0
+        for _, video in res.items():
             vid += 1
+            for interval_of_video in extract_samples(video, config):
+                raw_features = interval_of_video.get_raw_features(AU_r = parts.AU_paper_r,
+                                    AU_c = parts.AU_paper_c,
+                                    pose = parts.POSE_ROTATION_X_Z,
+                                    mouth_h = parts.MOUTH_H,
+                                    mouth_v = parts.MOUTH_V)
+                features = get_190_features(raw_features)
+                if rich: # instead of 190 --> 250
+                    features += get_rich_features(raw_features)
+                
+                if np.all(np.isfinite(features)):
+                    samples.append(features)
+                    videoids.append(vid)
 
-        # get the 20 features used in the paper for each sample
-        samples = []
-        for s_dx in dx_samples:            
-            raw_features = s_dx.get_raw_features(AU_r = parts.AU_paper_r,
-                                AU_c = parts.AU_paper_c,
-                                pose = parts.POSE_ROTATION_X_Z,
-                                mouth_h = parts.MOUTH_H,
-                                mouth_v = parts.MOUTH_V)
-            features = get_190_features(raw_features)
-            if rich: # instead of 190 --> 250
-                features += get_rich_features(raw_features)
-            samples.append(features)
 
         return samples, videoids
 
