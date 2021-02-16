@@ -23,10 +23,10 @@ path_test_real = f'../test_data/videos/real/{PERSON}/training'
 vd = VideoAnalizer()
 
 config = {'frames_per_sample':300}
-features_training_real = vd.process_video(fdir=path_training_real, config=config)
-features_training_fake = vd.process_video(fdir=path_training_fake, config=config)
-features_test_real = vd.process_video(fdir=path_test_real, config=config)
-features_test_fake = vd.process_video(fdir=path_test_fake, config=config)
+features_training_real, _ = vd.process_video(fdir=path_training_real, config=config)
+features_training_fake, _ = vd.process_video(fdir=path_training_fake, config=config)
+features_test_real, _ = vd.process_video(fdir=path_test_real, config=config)
+features_test_fake, _ = vd.process_video(fdir=path_test_fake, config=config)
 
 features_training_real = filter_features(features_training_real)
 features_training_fake = filter_features(features_training_fake)

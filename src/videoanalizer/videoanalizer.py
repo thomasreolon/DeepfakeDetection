@@ -1,4 +1,4 @@
-import os
+import os, random
 from joblib import dump
 from .openface import OpenFaceAPI
 from .openface import parts
@@ -62,9 +62,12 @@ class VideoAnalizer():
         res = self.api.process_video(files=files, fdir=fdir, vtype=config['vtype'])
 
         # divide the video into samples
-        dx_samples = []
+        dx_samples, videoids, vid = [], [], 0
         for _, dx in res.items():
-            dx_samples += extract_samples(dx, config)
+            tmp = extract_samples(dx, config)
+            dx_samples += tmp
+            videoids   += [vid for _ in range(len(tmp))]
+            vid += 1
 
         # get the 20 features used in the paper for each sample
         samples = []
@@ -75,11 +78,11 @@ class VideoAnalizer():
                                 mouth_h = parts.MOUTH_H,
                                 mouth_v = parts.MOUTH_V)
             features = get_190_features(raw_features)
-            if rich:
+            if rich: # instead of 190 --> 250
                 features += get_rich_features(raw_features)
             samples.append(features)
 
-        return samples
+        return samples, videoids
 
 
     def train_classifier(self, person_files, non_person_files, person_name='Real', clf_type='OneClassSVM', config=None, show_trainig_performance=False, save=False):
@@ -102,11 +105,13 @@ class VideoAnalizer():
             files = []
             for path in f:
                 if os.path.isdir(path):
-                    samples[i] += self.process_video(fdir=path, config=config)
+                    tmp, _ = self.process_video(fdir=path, config=config)
+                    samples[i] += tmp
                 else:
                     files.append(path)
             if files:
-                samples[i] += self.process_video(files=files, config=config)
+                tmp, _ = self.process_video(files=files, config=config)
+                samples[i] += tmp
 
         clf = train_specific_person_classifier(samples[0], samples[1], self, person_name,clf_type, show_trainig_performance)
         if (save): self.save_classifier(clf)
@@ -146,10 +151,22 @@ class VideoAnalizer():
             tmp=[]
             for fold in folders:
                 fdir = f'{root_dir}{fold}'
-                tmp += self.process_video(fdir=fdir, config=config)
+                tmp2, _ = self.process_video(fdir=fdir, config=config)
+                tmp += tmp2
             samples.append(tmp)
             fold_names.append(fold)
 
         out_dir = self.config['out_dir']
 
         plot_features2D(samples, out_dir, labels or fold_names, plot_type, )
+
+    def split_train_test(self, X, vid, train_fraction=0.66):
+        train_X, test_X, vids = [], [], list(set(vid))
+        k=1+int(len(vids)*(train_fraction))
+        train_vids_id = set(random.choices(vids, k=k))
+        for x, d in zip(X, vid):
+            if d in train_vids_id:
+                train_X.append(x)
+            else:
+                test_X.append(x)
+        return train_X, test_X

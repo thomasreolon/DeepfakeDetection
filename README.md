@@ -39,7 +39,7 @@ files = ['a.jpg', '../folder/imgs/obama.png']
 
 # Analysis Using Openface + Correlation Extraction
 vd = VideoAnalizer()
-arrays = vd.process_video(files=files)
+arrays, _ = vd.process_video(files=files)
 
 
 print(arrays)  # [[0.42 ,0.39, ..., -0.17], [0.6 ,0.343, ..., -0.3443]]

@@ -43,7 +43,7 @@ class Classifier():
             - integer that maps 'labels_map' into person is real or not
         """
         config = self.video_analizer._get_config({'interval':[(0,1e10)], 'frames_per_sample':-1})
-        x = self.video_analizer.process_video(files=[path_to_video], config=config)
+        x, _ = self.video_analizer.process_video(files=[path_to_video], config=config)
         y = self.predict(x)[0]
 
         if (return_label): y = self.labels_map[y]
