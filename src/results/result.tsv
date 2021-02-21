@@ -1,0 +1,35 @@
+WHAT FEATURES ARE SELECTED:  AU01_r π AU09_r(5): 9  AU01_r π AU06_r(3): 8  AU01_r π AU05_r(2): 7  AU01_r π AU20_r(11): 7  AU01_r π AU23_r(12): 7  AU01_r π AU02_r(0): 6  AU01_r π AU04_r(1): 6  AU01_r π AU07_r(4): 6  AU01_r π AU10_r(6): 6  AU01_r π AU12_r(7): 6  AU01_r π AU14_r(8): 6  AU01_r π AU15_r(9): 6  AU01_r π AU17_r(10): 6  AU01_r π AU25_r(13): 6  AU01_r π AU26_r(14): 6  AU01_r π pose_Rx(15): 6  AU01_r π pose_Rz(16): 6  AU01_r π mouth_dist_h(17): 6  AU01_r π mouth_dist_v(18): 6  AU02_r π AU04_r(19): 6  AU05_r π pose_Rz(67): 5  AU09_r π AU23_r(105): 4  AU02_r π AU09_r(23): 4  AU05_r π AU14_r(59): 4  avg.AU05_r(199): 3  std.pose_Rx(239): 3  avg.AU09_r(208): 3  std.pose_Rz(242): 3  AU05_r π AU09_r(56): 3  AU05_r π AU12_r(58): 3  AU05_r π mouth_dist_v(69): 3  AU23_r π AU26_r(170): 3  AU25_r π mouth_dist_v(179): 3  AU05_r π AU07_r(55): 3  avg.AU23_r(229): 2  AU09_r π AU20_r(104): 2  AU14_r π AU20_r(137): 2  AU02_r π AU10_r(24): 2  AU05_r π AU20_r(62): 2  AU02_r π AU06_r(21): 2  AU02_r π AU14_r(26): 2  AU05_r π pose_Rx(66): 2  AU05_r π AU10_r(57): 2  AU05_r π AU23_r(63): 2  AU23_r π AU25_r(169): 2  AU09_r π mouth_dist_v(111): 2  AU07_r π AU15_r(89): 2  AU09_r π AU15_r(102): 2  AU20_r π AU23_r(162): 1  AU12_r π mouth_dist_v(134): 1  avg.pose_Rx(238): 1  AU02_r π AU23_r(30): 1  AU26_r π mouth_dist_h(182): 1  AU10_r π AU25_r(118): 1  AU17_r π AU23_r(155): 1  AU09_r π AU17_r(103): 1  AU17_r π AU20_r(154): 1  AU09_r π pose_Rz(109): 1  AU09_r π mouth_dist_h(110): 1  AU14_r π pose_Rx(141): 1  AU04_r π pose_Rz(51): 1  AU12_r π AU17_r(126): 1  AU12_r π AU26_r(130): 1  std.AU23_r(230): 1  std.AU25_r(233): 1  AU14_r π AU23_r(138): 1  AU06_r π AU23_r(78): 1  AU02_r π AU26_r(32): 1  AU07_r π mouth_dist_h(97): 1  AU04_r π AU20_r(46): 1  AU05_r π AU06_r(54): 1  AU07_r π AU23_r(92): 1  AU12_r π AU15_r(125): 1  AU12_r π pose_Rz(132): 1  AU23_r π pose_Rx(171): 1  AU06_r π AU15_r(75): 1  AU14_r π AU26_r(140): 1  AU09_r π AU26_r(107): 1  AU17_r π mouth_dist_v(161): 1  AU09_r π AU14_r(101): 1  AU23_r π mouth_dist_h(173): 1  AU10_r π AU23_r(117): 1  AU02_r π AU15_r(27): 1  AU05_r π AU17_r(61): 1  AU12_r π AU20_r(127): 1
+
+SUM OF CONF. MATRICES FOR EACH MODEL:{
+  "OneClassSVM": [
+    "[460 647]",
+    "[ 61 299]"
+  ],
+  "Boosting": [
+    "[1026   81]",
+    "[246 114]"
+  ],
+  "LinearDiscriminantAnalysis": [
+    "[892 215]",
+    "[189 171]"
+  ],
+  "SVM-rbf": [
+    "[1065   42]",
+    "[273  87]"
+  ]
+}
+
+THE MODELS THAT HAD THE BEST AVG. PRECISION:[
+  [
+    0.8931372549019607,
+    "SVM-rbf"
+  ],
+  [
+    0.9145466405740378,
+    "Boosting"
+  ],
+  [
+    0.8975864318330071,
+    "SVM-rbf"
+  ]
+]

@@ -166,6 +166,8 @@ class OpenFaceAPI():
             paths = [f.split('/')[-1] for f in files]
             src = ' '.join([f'-f {f}' for f in files if f[-4:] in formats])
 
+
+
         if len(src)<=6 and len(res)==0:
             # if src is short->no files were found.... error
             raise Exception(M.EXE_PROCESS_VID_FILES)

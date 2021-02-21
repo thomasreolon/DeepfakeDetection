@@ -74,11 +74,10 @@ class VideoAnalizer():
                 features = get_190_features(raw_features)
                 if rich: # instead of 190 --> 250
                     features += get_rich_features(raw_features)
-                
+
                 if np.all(np.isfinite(features)):
                     samples.append(features)
                     videoids.append(vid)
-
 
         return samples, videoids
 

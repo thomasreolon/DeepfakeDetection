@@ -20,7 +20,7 @@ def get_dataset(vd, real_dir, fake_dir, rich=False, fps=1000):
         config = {'frames_per_sample':max(int(fps/100*len(X_r)),300)}
         X_r, vids = vd.process_video(fdir=real_dir, config=config, rich=rich)
     X_r_train, X_r_test = vd.split_train_test(X_r, vids)
-    
+
     # Fake Features
     X_f, vids = vd.process_video(fdir=fake_dir, config=config, rich=rich)
     if (len(X_r)>2*len(X_f)):
@@ -41,7 +41,7 @@ SELECTOR_CACHE={}
 def feature_selector(X,y, sel_type=0, override=False):
     if sel_type==0:
         return X,y,set()
-    
+
     if override:
         x_r, x_f = [],[]
         # Split Data
@@ -145,7 +145,7 @@ class CLFPaper(CLF):
         self.clf.fit(D)
     def predict(self, X):
         return self.clf.predict(X)
-    
+
 
 # 4.2 class for boosting
 class CLFBoost(CLF):
@@ -177,7 +177,7 @@ class CLFBoost(CLF):
             if yp!=yp2 or random.random()>0.4:
                 X3.append(x)
                 y3.append(yt)
-                
+
         self.clf3.fit(X3, y3)
     def predict(self, X):
         res = []
@@ -200,7 +200,7 @@ class CLFLinear(CLF):
         self.clf.fit(X,y)
     def predict(self, X):
         return self.clf.predict(X)
-   
+
 # 4.4 just SVM:rbf
 class CLFSVM(CLF):
     def __init__(self):
@@ -210,12 +210,16 @@ class CLFSVM(CLF):
         self.clf.fit(X,y)
     def predict(self, X):
         return self.clf.predict(X)
-   
+
 
 # INIT
 PATH='../test_data/videos/{}/{}'
 ENDC, OKCYAN, OKGREEN = '\033[0m', '\033[96m', '\033[92m'
 
+if(not os.path.exists("results/")):
+    os.mkdir("results/")
+
+file = open("results/result.tsv", "w+")
 
 vd = VideoAnalizer()
 what_features_are_selected = {}
@@ -244,9 +248,11 @@ for person in ['Obama']:    # for different people
                     y_pred = clf.predict(x_test)
 
                     c_mat = confusion_matrix(y_test, y_pred, labels=[1,-1])
+                    # file.write(f'\niteration:{iteration},rich:{rich},selector:{selector},model:{clf.name}\n')
+                    # file.write(f'{c_mat}\n\n')
                     print(f'\n{OKCYAN}iteration:{iteration},rich:{rich},selector:{selector},model:{clf.name}{ENDC}')
                     print(c_mat)
-                    
+
                     # update models with best persormance
                     avg_precision = (c_mat[0][0]/(c_mat[0][0]+c_mat[0][1])+c_mat[1][1]/(c_mat[1][1]+c_mat[1][0]))/2
                     if best3_models[0][0] < avg_precision:
@@ -256,7 +262,7 @@ for person in ['Obama']:    # for different people
                                 tmp             = best3_models[i]
                                 best3_models[i] = best3_models[0]
                                 best3_models[0] = tmp
-                    
+
                     # update avg. conf matrix
                     if clf.name in avg_model_precision:
                         avg_model_precision[clf.name] += c_mat
@@ -264,17 +270,25 @@ for person in ['Obama']:    # for different people
                         avg_model_precision[clf.name] = np.array(c_mat)
 
 print(f'{OKGREEN}WHAT FEATURES ARE SELECTED:{ENDC}')
+file.write(f'WHAT FEATURES ARE SELECTED:')
 wfs = list(what_features_are_selected.items())
 wfs.sort(reverse=True, key=lambda k: k[1])
 for f_id, count in wfs:
     print(f'  {ALL_LABELS[f_id]}({f_id}): {count}')
+    file.write(f'  {ALL_LABELS[f_id]}({f_id}): {count}')
 
-print(f'\n{OKGREEN}SUM OF CONF. MATRICES FOR EACH MODEL:{ENDC}')
+print(f'\n\n{OKGREEN}SUM OF CONF. MATRICES FOR EACH MODEL:{ENDC}')
+file.write(f'\n\nSUM OF CONF. MATRICES FOR EACH MODEL:')
 tmp = {k:[str(v[0]), str(v[1])] for k,v in avg_model_precision.items()}
 print(json.dumps(tmp, indent=2))
+file.write(f'{json.dumps(tmp, indent=2)}')
 
-print(f'\n{OKGREEN}THE MODELS THAT HAD THE BEST AVG. PRECISION:{ENDC}')
+print(f'\n\n{OKGREEN}THE MODELS THAT HAD THE BEST AVG. PRECISION:{ENDC}')
+file.write(f'\n\nTHE MODELS THAT HAD THE BEST AVG. PRECISION:')
 print(json.dumps(best3_models, indent=2))
+file.write(f'{json.dumps(best3_models, indent=2)}')
+
+file.close()
 
 """
 _____________________________________________________________________________________________

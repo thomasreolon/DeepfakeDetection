@@ -14,8 +14,8 @@ def filter_features(features):
                 break
     return features_new
 
-path_fake = f'../test_data/videos/fake/{PERSON}'
-path_real = f'../test_data/videos/real/{PERSON}'
+path_fake = f'../test_data/videos/fake/{PERSON}/training'
+path_real = f'../test_data/videos/real/{PERSON}/training'
 
 vd = VideoAnalizer()
 
