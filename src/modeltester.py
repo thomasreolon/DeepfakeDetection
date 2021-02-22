@@ -228,7 +228,7 @@ class CLFSVM(CLF):
 
 # INIT
 # PATH='../test_data/videos/{}/{}'
-PATH = '../test_data/videos/{}/{}/'
+PATH = '../test_data/videos/{}/{}'
 ENDC, OKCYAN, OKGREEN = '\033[0m', '\033[96m', '\033[92m'
 
 if(not os.path.exists("results/")):
@@ -241,7 +241,7 @@ what_features_are_selected = {}
 avg_model_precision = {}
 best3_models = [(0,'None'), (0,'None'), (0,'None')]
 
-for path in ['__challenge_new']:    # for different people
+for path in ['__challenge_all']:    # for different people
     REAL_PATH = PATH.format('real', path)
     FAKE_PATH = PATH.format('fake', path)
     for iteration in (0,1,2):           # split dataset in 3 different ways
