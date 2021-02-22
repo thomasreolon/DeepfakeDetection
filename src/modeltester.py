@@ -149,7 +149,7 @@ class CLFPaper(CLF):
 # 4.1 class for OneClassSVM
 class OneClassRbf(CLF):
     def __init__(self):
-        super().__init__('OneClassSVM')
+        super().__init__('OneClassSVM_rbf')
         self.clf = OneClassSVM(nu=0.1, kernel="rbf", gamma=0.1)
     def fit(self,X,y):
         D=[]
@@ -227,7 +227,8 @@ class CLFSVM(CLF):
 
 
 # INIT
-PATH='../test_data/videos/{}/{}'
+# PATH='../test_data/videos/{}/{}'
+PATH = '../test_data/videos/{}/{}/'
 ENDC, OKCYAN, OKGREEN = '\033[0m', '\033[96m', '\033[92m'
 
 if(not os.path.exists("results/")):
@@ -240,9 +241,9 @@ what_features_are_selected = {}
 avg_model_precision = {}
 best3_models = [(0,'None'), (0,'None'), (0,'None')]
 
-for person in ['Obama']:    # for different people
-    REAL_PATH = PATH.format('real', person)
-    FAKE_PATH = PATH.format('fake', person)
+for path in ['__challenge_new']:    # for different people
+    REAL_PATH = PATH.format('real', path)
+    FAKE_PATH = PATH.format('fake', path)
     for iteration in (0,1,2):           # split dataset in 3 different ways
         for rich in (True, False):      # with 190 features, with 250 features
             x_train, y_train, x_test, y_test = get_dataset(vd, REAL_PATH, FAKE_PATH, rich=rich, fps=300+iteration*200)
