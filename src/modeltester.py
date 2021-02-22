@@ -146,6 +146,20 @@ class CLFPaper(CLF):
     def predict(self, X):
         return self.clf.predict(X)
 
+# 4.1 class for OneClassSVM
+class OneClassRbf(CLF):
+    def __init__(self):
+        super().__init__('OneClassSVM')
+        self.clf = OneClassSVM(nu=0.1, kernel="rbf", gamma=0.1)
+    def fit(self,X,y):
+        D=[]
+        for a,b in zip(X,y):
+            if b==1 or random.random()>0.95:
+                D.append(a)
+        self.clf.fit(D)
+    def predict(self, X):
+        return self.clf.predict(X)
+
 
 # 4.2 class for boosting
 class CLFBoost(CLF):
@@ -242,7 +256,7 @@ for person in ['Obama']:    # for different people
                     else:
                         what_features_are_selected[f_id] = 1
 
-                for Clf in (CLFPaper, CLFBoost, CLFLinear, CLFSVM): #for different models
+                for Clf in (CLFPaper, CLFBoost, CLFLinear, CLFSVM, OneClassRbf): #for different models
                     clf = Clf()
                     clf.fit(x_train, y_train)
                     y_pred = clf.predict(x_test)
