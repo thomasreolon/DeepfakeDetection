@@ -62,9 +62,8 @@ class VideoAnalizer():
         res = self.api.process_video(files=files, fdir=fdir, vtype=config['vtype'])
 
         # divide the videos into samples, then extract the features from each sample
-        samples, videoids, vid = [], [], 0
-        for _, video in res.items():
-            vid += 1
+        samples, videoids = [], []
+        for fname, video in res.items():
             for interval_of_video in extract_samples(video, config):
                 raw_features = interval_of_video.get_raw_features(AU_r = parts.AU_paper_r,
                                     AU_c = parts.AU_paper_c,
@@ -77,7 +76,7 @@ class VideoAnalizer():
 
                 if np.all(np.isfinite(features)):
                     samples.append(features)
-                    videoids.append(vid)
+                    videoids.append(fname)
 
         return samples, videoids
 
@@ -157,13 +156,18 @@ class VideoAnalizer():
 
         plot_features2D(samples, out_dir, labels or fold_names, plot_type, )
 
-    def split_train_test(self, X, vid, train_fraction=0.66):
+    def split_train_test(self, X, vid, train_fraction=0.66, labels_offset=None):
         train_X, test_X, vids = [], [], list(set(vid))
         k=1+int(len(vids)*(train_fraction))
         train_vids_id = set(random.choices(vids, k=k))
+        labels = {'train':{}, 'test':{}}
+        if labels_offset is None:
+            labels_offset = (0,0)
         for x, d in zip(X, vid):
             if d in train_vids_id:
+                labels['train'][len(train_X)+labels_offset[0]] = d
                 train_X.append(x)
             else:
+                labels['test'][len(test_X)+labels_offset[1]] = d
                 test_X.append(x)
-        return train_X, test_X
+        return train_X, test_X, labels

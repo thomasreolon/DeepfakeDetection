@@ -19,21 +19,21 @@ def get_dataset(vd, real_dir, fake_dir, rich=False, fps=1000):
     if len(X_r)<100:
         config = {'frames_per_sample':max(int(fps/100*len(X_r)),300)}
         X_r, vids = vd.process_video(fdir=real_dir, config=config, rich=rich)
-    X_r_train, X_r_test = vd.split_train_test(X_r, vids)
+    X_r_train, X_r_test, labels_r = vd.split_train_test(X_r, vids)
 
     # Fake Features
     X_f, vids = vd.process_video(fdir=fake_dir, config=config, rich=rich)
     if (len(X_r)>2*len(X_f)):
         config = {'frames_per_sample':max(int(fps/100*len(X_f)),250)}
         X_r, vids = vd.process_video(fdir=fake_dir, config=config, rich=rich)
-    X_f_train, X_f_test = vd.split_train_test(X_r, vids)
+    X_f_train, X_f_test, labels_f = vd.split_train_test(X_r, vids, labels_offset=(len(X_r_train), len(X_r_test)))
 
     # Dataset
     x_train = X_r_train + X_f_train
     x_test  = X_r_test  + X_f_test
     y_train = [1 for x in X_r_train] + [-1 for x in X_f_train]
     y_test  = [1 for x in X_r_test] + [-1 for x in X_f_test]
-    return x_train, y_train, x_test, y_test
+    return x_train, y_train, x_test, y_test, dict(labels_r, **labels_f)
 
 
 # 2 -> features selector
@@ -239,14 +239,15 @@ file = open("results/result.tsv", "w+")
 vd = VideoAnalizer()
 what_features_are_selected = {}
 avg_model_precision = {}
+wrongly_classified = {}
 best3_models = [(0,'None'), (0,'None'), (0,'None')]
 
-for path in ['__challenge_all']:    # for different people
+for path in ['Obama']:    # for different people
     REAL_PATH = PATH.format('real', path)
     FAKE_PATH = PATH.format('fake', path)
     for iteration in (0,1,2):           # split dataset in 3 different ways
         for rich in (True, False):      # with 190 features, with 250 features
-            x_train, y_train, x_test, y_test = get_dataset(vd, REAL_PATH, FAKE_PATH, rich=rich, fps=300+iteration*200)
+            x_train, y_train, x_test, y_test, labels = get_dataset(vd, REAL_PATH, FAKE_PATH, rich=rich, fps=300+iteration*200)
 
             for selector in (0,1,2):    # train with full features, a subset, a subset+pca+lda
                 x_train, y_train, gf = feature_selector(x_train, y_train,sel_type=selector, override=True)
@@ -284,6 +285,17 @@ for path in ['__challenge_all']:    # for different people
                     else:
                         avg_model_precision[clf.name] = np.array(c_mat)
 
+                    # which are wrongly classified
+                    i=0
+                    for yt, yp in zip(y_test, y_pred):
+                        i+=1
+                        if yt != yp:
+                            name=f'{(yt==1 and "real") or "fake"}/{labels["test"][i]}'
+                            if name in wrongly_classified:
+                                wrongly_classified[name] += 1
+                            else:
+                                wrongly_classified[name] = 1
+
 print(f'{OKGREEN}WHAT FEATURES ARE SELECTED:{ENDC}')
 file.write(f'WHAT FEATURES ARE SELECTED:')
 wfs = list(what_features_are_selected.items())
@@ -302,6 +314,11 @@ print(f'\n\n{OKGREEN}THE MODELS THAT HAD THE BEST AVG. PRECISION:{ENDC}')
 file.write(f'\n\nTHE MODELS THAT HAD THE BEST AVG. PRECISION:')
 print(json.dumps(best3_models, indent=2))
 file.write(f'{json.dumps(best3_models, indent=2)}')
+
+print(f'\n\n{OKGREEN}WHICH FILES GENERATED ERRORS:{ENDC}')
+file.write(f'\n\nWHICH FILES GENERATED ERRORS:')
+print(json.dumps(wrongly_classified, indent=2))
+file.write(f'{json.dumps(wrongly_classified, indent=2)}')
 
 file.close()
 
