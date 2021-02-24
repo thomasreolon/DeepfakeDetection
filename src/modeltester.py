@@ -33,7 +33,10 @@ def get_dataset(vd, real_dir, fake_dir, rich=False, fps=1000):
     x_test  = X_r_test  + X_f_test
     y_train = [1 for x in X_r_train] + [-1 for x in X_f_train]
     y_test  = [1 for x in X_r_test] + [-1 for x in X_f_test]
-    return x_train, y_train, x_test, y_test, dict(labels_r, **labels_f)
+    pt1={**labels_r['train'], **labels_f['train']}
+    pt2={**labels_r['test'],  **labels_f['test']}
+    labels  = {'train':pt1, 'test':pt2}
+    return x_train, y_train, x_test, y_test, labels
 
 
 # 2 -> features selector
@@ -287,14 +290,15 @@ for path in ['Obama']:    # for different people
 
                     # which are wrongly classified
                     i=0
+                    print(labels)
                     for yt, yp in zip(y_test, y_pred):
-                        i+=1
                         if yt != yp:
                             name=f'{(yt==1 and "real") or "fake"}/{labels["test"][i]}'
                             if name in wrongly_classified:
                                 wrongly_classified[name] += 1
                             else:
                                 wrongly_classified[name] = 1
+                        i+=1
 
 print(f'{OKGREEN}WHAT FEATURES ARE SELECTED:{ENDC}')
 file.write(f'WHAT FEATURES ARE SELECTED:')
