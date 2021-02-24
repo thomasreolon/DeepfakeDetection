@@ -156,10 +156,13 @@ class VideoAnalizer():
 
         plot_features2D(samples, out_dir, labels or fold_names, plot_type, )
 
-    def split_train_test(self, X, vid, train_fraction=0.66, labels_offset=None):
-        train_X, test_X, vids = [], [], list(set(vid))
+    def split_train_test(self, X, vid, train_fraction=0.66, labels_offset=None, deterministic = False):
+        train_X, test_X, vids = [], [], sorted(list(set(vid)))
         k=1+int(len(vids)*(train_fraction))
-        train_vids_id = set(random.choices(vids, k=k))
+        if(deterministic):
+            train_vids_id = set(vids[i] for i in range(k))
+        else:
+            train_vids_id = set(random.choices(vids, k=k))
         labels = {'train':{}, 'test':{}}
         if labels_offset is None:
             labels_offset = (0,0)
