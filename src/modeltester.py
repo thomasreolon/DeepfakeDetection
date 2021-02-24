@@ -12,7 +12,7 @@ import json
 os.chdir(pathlib.Path(__file__).parent.absolute()) # for debugging
 
 # 1 get dataset
-def get_dataset(vd, real_dir, fake_dir, rich=False, fps=1000):
+def get_dataset(vd, real_dir, fake_dir, rich=False, fps=1000, train_fraction=0.66):
     config = {'frames_per_sample':fps}
     # Real features
     X_r, vids = vd.process_video(fdir=real_dir, config=config, rich=rich)
@@ -233,6 +233,7 @@ class CLFSVM(CLF):
 PATH = '../test_data/videos/{}/{}'
 OUT_DIR = '../output/results/'
 ENDC, OKCYAN, OKGREEN = '\033[0m', '\033[96m', '\033[92m'
+N_ITER = 8
 
 if(not os.path.exists(OUT_DIR)):
     os.mkdir(OUT_DIR)
@@ -245,12 +246,14 @@ avg_model_precision = {}
 wrongly_classified = {}
 best3_models = [(0,'None'), (0,'None'), (0,'None')]
 
+
 for path in ['Obama']:    # for different people
     REAL_PATH = PATH.format('real', path)
     FAKE_PATH = PATH.format('fake', path)
-    for iteration in (0,1,2):           # split dataset in 3 different ways
+    for iteration in range(6):           # split dataset in 3 different ways
         for rich in (True, False):      # with 190 features, with 250 features
-            x_train, y_train, x_test, y_test, labels = get_dataset(vd, REAL_PATH, FAKE_PATH, rich=rich, fps=300+iteration*200)
+            fps, train_fraction=300+(iteration%3)*200, 0.6 + (0.15*iteration/2)
+            x_train, y_train, x_test, y_test, labels = get_dataset(vd, REAL_PATH, FAKE_PATH, rich=rich, fps=fps, train_fraction=train_fraction)
             
             # Report the composition of the dataset
             file.write('\n====================================================================================\n')
