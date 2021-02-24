@@ -119,7 +119,7 @@ class VideoAnalizer():
         dump(clf, path)
 
 
-    def plot_features(self, folders_list, root_dir=None, labels=None, plot_type='PCA', config=None):
+    def plot_features(self, folders_list, root_dir=None, labels=None, plot_type='PCA', config=None, save_path=None):
         """
         folders_list is a list of list of folders. each folder contains videos.
         each list of folders will have the same label.
@@ -152,7 +152,7 @@ class VideoAnalizer():
             samples.append(tmp)
             fold_names.append(fold)
 
-        out_dir = self.config['out_dir']
+        out_dir = save_path or self.config['out_dir']
 
         plot_features2D(samples, out_dir, labels or fold_names, plot_type, )
 

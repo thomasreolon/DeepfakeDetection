@@ -230,14 +230,14 @@ class CLFSVM(CLF):
 
 
 # INIT
-# PATH='../test_data/videos/{}/{}'
 PATH = '../test_data/videos/{}/{}'
+OUT_DIR = '../output/results/'
 ENDC, OKCYAN, OKGREEN = '\033[0m', '\033[96m', '\033[92m'
 
-if(not os.path.exists("results/")):
-    os.mkdir("results/")
+if(not os.path.exists(OUT_DIR)):
+    os.mkdir(OUT_DIR)
 
-file = open("results/result.tsv", "w+")
+file = open(f"{OUT_DIR}result.tsv", "w+")
 
 vd = VideoAnalizer()
 what_features_are_selected = {}
@@ -251,6 +251,19 @@ for path in ['Obama']:    # for different people
     for iteration in (0,1,2):           # split dataset in 3 different ways
         for rich in (True, False):      # with 190 features, with 250 features
             x_train, y_train, x_test, y_test, labels = get_dataset(vd, REAL_PATH, FAKE_PATH, rich=rich, fps=300+iteration*200)
+            
+            # Report the composition of the dataset
+            file.write('\n====================================================================================\n')
+            file.write(f'len(x_train):{len(x_train)},   len(x_test):{len(x_test)}\n')
+            training_files = [f_name for f_id, f_name in labels['train'].items()]
+            training_files_count = {}
+            for f in training_files:
+                if f in training_files_count:
+                    training_files_count[f] += 1
+                else:
+                    training_files_count[f] = 1
+            file.write(f'trainingset:\n{json.dumps(training_files_count, indent=2)}')
+            file.write('\n====================================================================================\n')
 
             for selector in (0,1,2):    # train with full features, a subset, a subset+pca+lda
                 x_train, y_train, gf = feature_selector(x_train, y_train,sel_type=selector, override=True)
@@ -267,10 +280,7 @@ for path in ['Obama']:    # for different people
                     y_pred = clf.predict(x_test)
 
                     c_mat = confusion_matrix(y_test, y_pred, labels=[1,-1])
-                    # file.write(f'\niteration:{iteration},rich:{rich},selector:{selector},model:{clf.name}\n')
-                    # file.write(f'{c_mat}\n\n')
-                    print(f'\n{OKCYAN}iteration:{iteration},rich:{rich},selector:{selector},model:{clf.name}{ENDC}')
-                    print(c_mat)
+                    
 
                     # update models with best persormance
                     avg_precision = (c_mat[0][0]/(c_mat[0][0]+c_mat[0][1])+c_mat[1][1]/(c_mat[1][1]+c_mat[1][0]))/2
@@ -289,16 +299,32 @@ for path in ['Obama']:    # for different people
                         avg_model_precision[clf.name] = np.array(c_mat)
 
                     # which are wrongly classified
-                    i=0
-                    print(labels)
-                    for yt, yp in zip(y_test, y_pred):
+                    for yt, yp, i in zip(y_test, y_pred, range(9999)):
+                        file_name=f'{(yt==1 and "real") or "fake"}/{labels["test"][i]}'
+                        if not file_name in wrongly_classified:
+                            wrongly_classified[file_name] = [0,1]
+                        else:
+                            wrongly_classified[file_name][1] += 1
                         if yt != yp:
-                            name=f'{(yt==1 and "real") or "fake"}/{labels["test"][i]}'
-                            if name in wrongly_classified:
-                                wrongly_classified[name] += 1
-                            else:
-                                wrongly_classified[name] = 1
-                        i+=1
+                                wrongly_classified[file_name][0] += 1
+
+                    # Report for each model in the file:
+                    file.write(f'person:{path},iteration:{iteration},rich:{rich},selector:{selector},model:{clf.name}\n')
+                    file.write(f'{c_mat}\n')
+                    file.write(f'accuracy:{(c_mat[0][0]+c_mat[1][1])/len(x_test)}, precision:{c_mat[0][0]/(c_mat[0][0]+c_mat[1][0])}, recall:{c_mat[0][0]/(c_mat[0][0]+c_mat[0][1])}\n')
+                    tot = {}
+                    for yt, yp, i in zip(y_test, y_pred, range(9999)):
+                        file_name=f'{(yt==1 and "real") or "fake"}/{labels["test"][i]}'
+                        if not file_name in tot:
+                            tot[file_name] = [0,1]
+                        else:
+                            tot[file_name][1] += 1
+                        if yt != yp:
+                                tot[file_name][0] += 1
+                    tmp = [(f,c[0]/c[1]) for f,c in tot.items()]
+                    tmp.sort(key=lambda c: -c[1])                  # sort by % errors
+                    file.write(f'errors:{tmp}\n')
+                    file.write(f'_________________________\n')
 
 print(f'{OKGREEN}WHAT FEATURES ARE SELECTED:{ENDC}')
 file.write(f'WHAT FEATURES ARE SELECTED:')
@@ -319,10 +345,13 @@ file.write(f'\n\nTHE MODELS THAT HAD THE BEST AVG. PRECISION:')
 print(json.dumps(best3_models, indent=2))
 file.write(f'{json.dumps(best3_models, indent=2)}')
 
-print(f'\n\n{OKGREEN}WHICH FILES GENERATED ERRORS:{ENDC}')
-file.write(f'\n\nWHICH FILES GENERATED ERRORS:')
-print(json.dumps(wrongly_classified, indent=2))
-file.write(f'{json.dumps(wrongly_classified, indent=2)}')
+tmp = [(f,c[0]/c[1]) for f,c in wrongly_classified.items()]
+tmp.sort(key=lambda c: -c[1])
+tmp = [f'{f}         : {c}' for f,c in tmp]
+print(f'\n\n{OKGREEN}FILES & MISSCLASSIFICATION PROBABILITY:{ENDC}')
+file.write(f'\n\nFILES & MISSCLASSIFICATION PROBABILITY:')
+print(json.dumps(tmp, indent=2))
+file.write(f'{json.dumps(tmp, indent=2)}')
 
 file.close()
 

@@ -64,7 +64,7 @@ def plot_features2D(data,out_dir, labels, ptype='PCA'):
     plt.legend()
     plt.savefig(f'{out_dir}/{tit}.png')           # save plot
     plt.clf()
-    np.save(f'{out_dir}/{tit}.array', data_result)# save low dimensional space
+    #np.save(f'{out_dir}/{tit}.array', data_result)# save low dimensional space
 
 
     if (ptype=='PCA'):
