@@ -7,25 +7,26 @@ from sklearn.svm import SVC
 from sklearn.metrics import confusion_matrix
 from videoanalizer import VideoAnalizer
 from videoanalizer.covariance import ALL_LABELS
+from prettytable import PrettyTable
 import json
 
 os.chdir(pathlib.Path(__file__).parent.absolute()) # for debugging
 
 # 1 get dataset
-def get_dataset(vd, real_dir, fake_dir, rich=False, fps=1000, train_fraction=0.66):
+def get_dataset(vd, real_dir, fake_dir, rich=False, fps=1000, train_fraction=0.66, rich_features=0):
     config = {'frames_per_sample':fps}
     # Real features
-    X_r, vids = vd.process_video(fdir=real_dir, config=config, rich=rich)
+    X_r, vids = vd.process_video(fdir=real_dir, config=config, rich_features=rich_features)
     if len(X_r)<100:
         config = {'frames_per_sample':max(int(fps/100*len(X_r)),300)}
-        X_r, vids = vd.process_video(fdir=real_dir, config=config, rich=rich)
+        X_r, vids = vd.process_video(fdir=real_dir, config=config, rich_features=rich_features)
     X_r_train, X_r_test, labels_r = vd.split_train_test(X_r, vids, deterministic = True)
 
     # Fake Features
-    X_f, vids = vd.process_video(fdir=fake_dir, config=config, rich=rich)
+    X_f, vids = vd.process_video(fdir=fake_dir, config=config, rich_features=rich_features)
     if (len(X_r)>2*len(X_f)):
         config = {'frames_per_sample':max(int(fps/100*len(X_f)),250)}
-        X_r, vids = vd.process_video(fdir=fake_dir, config=config, rich=rich)
+        X_r, vids = vd.process_video(fdir=fake_dir, config=config, rich_features=rich_features)
     X_f_train, X_f_test, labels_f = vd.split_train_test(X_r, vids, labels_offset=(len(X_r_train), len(X_r_test)), deterministic = True)
 
     # Dataset
@@ -41,7 +42,7 @@ def get_dataset(vd, real_dir, fake_dir, rich=False, fps=1000, train_fraction=0.6
 
 # 2 -> features selector
 SELECTOR_CACHE={}
-def feature_selector(X,y, sel_type=0, override=False):
+def feature_selector(X,y, sel_type=0, override=False, pca_components = 3):
     if sel_type==0:
         return X,y,set()
 
@@ -100,7 +101,7 @@ def feature_selector(X,y, sel_type=0, override=False):
         # use pca/lda to get some other insights
         SELECTOR_CACHE['good'] = good_features
         if sel_type == 2:
-            pca = PCA(n_components=3)
+            pca = PCA(n_components=pca_components)
             SELECTOR_CACHE['pca'] = pca
         elif sel_type == 3:
             lda = LinearDiscriminantAnalysis()
@@ -252,17 +253,17 @@ avg_model_precision = {}
 wrongly_classified = {}
 best3_models = [(0,'None', 'None', 'None'), (0,'None', 'None', 'None'), (0,'None', 'None', 'None')]
 
-for path in ['Obama']:    # for different people
+for path in ['__challenge_all']:    # for different people
     REAL_PATH = PATH.format('real', path)
     FAKE_PATH = PATH.format('fake', path)
-    for rich in (True, False):      # with 190 features, with 250 features
-        x_train, y_train, x_test, y_test, labels = get_dataset(vd, REAL_PATH, FAKE_PATH, rich=rich)
+    for rich in (0,1,2):      # with 190 features, with 250 features, with only rich_features
+        x_train, y_train, x_test, y_test, labels = get_dataset(vd, REAL_PATH, FAKE_PATH, rich_features=rich)
 
         file.write("\n\n-------------------++SIZES++-------------------\n")
         file.write(f"   Training set size: {len(x_train)}\n")
         file.write(f"   Test set size: {len(x_test)}\n")
         file.write("-------------------++SIZES++-------------------\n\n")
-
+        R = "190" if rich==0 else "250" if rich==1 else "only rich features"
         # 0 full features, 1 subset, 2 pca, 3 lda
         for selector in (0,1,2,3):
             x_train, y_train, gf = feature_selector(x_train, y_train,sel_type=selector, override=True)
@@ -272,15 +273,15 @@ for path in ['Obama']:    # for different people
             #         what_features_are_selected[f_id] += 1
             #     else:
             #         what_features_are_selected[f_id] = 1
-
+            F = "all" if selector==0 else "best features" if selector==1 else "PCA" if selector==2 else "LDA"
+            file.write(f"                      Rich:{R} | Features: {F}\n")
+            table = PrettyTable(["Model", "Accuracy", "Confusion Matrix"])
             for Clf in (CLFPaper, CLFBoost, CLFLinear, CLFSVM, OneClassRbf): #for different models
                 clf = Clf()
                 clf.fit(x_train, y_train)
                 y_pred = clf.predict(x_test)
 
                 c_mat = confusion_matrix(y_test, y_pred, labels=[1,-1])
-
-                F = "all" if selector==0 else "best features" if selector==1 else "PCA" if selector==2 else "LDA"
 
                 # update models with best persormance
                 avg_precision = (c_mat[0][0]/(c_mat[0][0]+c_mat[0][1])+c_mat[1][1]/(c_mat[1][1]+c_mat[1][0]))/2
@@ -292,10 +293,13 @@ for path in ['Obama']:    # for different people
                             best3_models[i] = best3_models[0]
                             best3_models[0] = tmp
 
-                file.write(f"\nMODEL: {clf.name}\n")
-                file.write(f"Rich:{rich} | Features: {F}\n")
-                file.write(f'Confusion matrix{c_mat}\n\n')
-                file.write(f'Average precision {avg_precision}\n<>-------------------------<>\n')
+
+                table.align["City name"] = "l"
+                table.padding_width = 1
+                table.add_row([f"{clf.name}",avg_precision, c_mat])
+                # file.write(f"\nMODEL: \n")
+                # file.write(f'Confusion matrix{c_mat}\n\n')
+                # file.write(f'Average precision {avg_precision}\n<>-------------------------<>\n')
                 print(f'\n{OKCYAN}rich:{rich},selector:{selector},model:{clf.name}{ENDC}')
                 print(c_mat)
 
@@ -306,20 +310,22 @@ for path in ['Obama']:    # for different people
                     avg_model_precision[clf.name] = np.array(c_mat)
 
                 # which are wrongly classified
-                tot = {}
-                for yt, yp, i in zip(y_test, y_pred, range(9999)):
-                    file_name=f'{(yt==1 and "real") or "fake"}/{labels["test"][i]}'
-                    if not file_name in tot:
-                        tot[file_name] = [0,1]
-                    else:
-                        tot[file_name][1] += 1
-                    if yt != yp:
-                            tot[file_name][0] += 1
-                tmp = [(f,c[0]/c[1]) for f,c in tot.items()]
-                tmp.sort(key=lambda c: -c[1])                  # sort by % errors
-                file.write(f'errors:{tmp}\n')
-                file.write(f'_________________________\n')
-
+                # tot = {}
+                # for yt, yp, i in zip(y_test, y_pred, range(9999)):
+                #     file_name=f'{(yt==1 and "real") or "fake"}/{labels["test"][i]}'
+                #     if not file_name in tot:
+                #         tot[file_name] = [0,1]
+                #     else:
+                #         tot[file_name][1] += 1
+                #     if yt != yp:
+                #             tot[file_name][0] += 1
+                # tmp = [(f,c[0]/c[1]) for f,c in tot.items()]
+                # tmp.sort(key=lambda c: -c[1])                  # sort by % errors
+                # file.write(f'errors:{tmp}\n')
+                # file.write(f'_________________________\n')
+                pass
+            file.write(str(table))
+            file.write("\n\n----------------------------------------------------------------------\n\n")
 # print(f'{OKGREEN}WHAT FEATURES ARE SELECTED:{ENDC}')
 # file.write(f'WHAT FEATURES ARE SELECTED:')
 # wfs = list(what_features_are_selected.items())

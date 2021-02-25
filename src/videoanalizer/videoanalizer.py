@@ -37,7 +37,7 @@ class VideoAnalizer():
                     tmp[k] = v
         return tmp
 
-    def process_video(self, files=None, fdir=None, config=None, rich=False):
+    def process_video(self, files=None, fdir=None, config=None, rich=False, rich_features=0):
         """
         returns a list of array where each array contains the 190 features.
         number of arrays = sum_video [ n_frames(get_only_frames_in(video, interval))/frames_per_sample ]
@@ -71,8 +71,10 @@ class VideoAnalizer():
                                     mouth_h = parts.MOUTH_H,
                                     mouth_v = parts.MOUTH_V)
                 features = get_190_features(raw_features)
-                if rich: # instead of 190 --> 250
+                if (rich or (rich_features == 1)): # instead of 190 --> 250
                     features += get_rich_features(raw_features)
+                if(rich_features == 2): # only reach features
+                    features = get_rich_features(raw_features)
 
                 if np.all(np.isfinite(features)):
                     samples.append(features)
