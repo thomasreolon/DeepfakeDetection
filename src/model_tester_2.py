@@ -1,5 +1,4 @@
-import numpy as np
-import os, pathlib, random
+import numpy as np, json, sys, os, pathlib, random
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.svm import OneClassSVM
@@ -8,7 +7,6 @@ from sklearn.metrics import confusion_matrix
 from videoanalizer import VideoAnalizer
 from videoanalizer.covariance import ALL_LABELS
 from prettytable import PrettyTable
-import json
 
 os.chdir(pathlib.Path(__file__).parent.absolute()) # for debugging
 
@@ -241,6 +239,7 @@ class CLFSVM(CLF):
 PATH = '../test_data/videos/{}/{}'
 ENDC, OKCYAN, OKGREEN = '\033[0m', '\033[96m', '\033[92m'
 OUT_DIR = '../output/results/'
+DATASET = sys.argv[1]
 
 if(not os.path.exists(OUT_DIR)):
     os.mkdir(OUT_DIR)
@@ -253,7 +252,7 @@ avg_model_precision = {}
 wrongly_classified = {}
 best3_models = [(0,'None', 'None', 'None'), (0,'None', 'None', 'None'), (0,'None', 'None', 'None')]
 
-for path in ['__challenge_all']:    # for different people
+for path in [DATASET]:    # for different people
     REAL_PATH = PATH.format('real', path)
     FAKE_PATH = PATH.format('fake', path)
     for rich in (0,1,2):      # with 190 features, with 250 features, with only rich_features
@@ -286,7 +285,7 @@ for path in ['__challenge_all']:    # for different people
                 # update models with best persormance
                 avg_precision = (c_mat[0][0]/(c_mat[0][0]+c_mat[0][1])+c_mat[1][1]/(c_mat[1][1]+c_mat[1][0]))/2
                 if best3_models[0][0] < avg_precision:
-                    best3_models[0]=(avg_precision, clf.name, rich, F)
+                    best3_models[0]=(avg_precision, clf.name, R, F)
                     for i in (1,2):
                         if best3_models[i][0] < best3_models[0][0]:
                             tmp             = best3_models[i]
