@@ -247,7 +247,7 @@ wrongly_classified = {}
 best3_models = [(0,'None'), (0,'None'), (0,'None')]
 
 
-for path in ['Obama']:    # for different people
+for path in ['me']:    # for different people
     REAL_PATH = PATH.format('real', path)
     FAKE_PATH = PATH.format('fake', path)
     for iteration in range(6):           # split dataset in 3 different ways
@@ -277,7 +277,7 @@ for path in ['Obama']:    # for different people
                     else:
                         what_features_are_selected[f_id] = 1
 
-                for Clf in (CLFPaper, CLFBoost, CLFLinear, CLFSVM, OneClassRbf): #for different models
+                for Clf in (CLFPaper, OneClassRbf): #for different models
                     clf = Clf()
                     clf.fit(x_train, y_train)
                     y_pred = clf.predict(x_test)

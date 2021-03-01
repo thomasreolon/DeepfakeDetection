@@ -4,7 +4,7 @@ from .openface import OpenFaceAPI
 from .openface import parts
 from .samplesextractor import extract_samples
 from .covariance import get_190_features, get_rich_features
-from .classifier import train_specific_person_classifier
+from .classifier import OneClassRbf
 from .plots import plot_features2D
 
 class VideoAnalizer():
@@ -83,38 +83,6 @@ class VideoAnalizer():
         return samples, videoids
 
 
-    def train_classifier(self, person_files, non_person_files, person_name='Real', clf_type='OneClassSVM', config=None, show_trainig_performance=False, save=False):
-        """
-        input:
-            person_files is a list of folders or files that contain a person
-            person_non_files is a list folders or files that contains fakes, other people
-            person_name is the name of the person in person_files
-
-        output:
-            a classifier that can recognize person_name in videos
-        """
-        config = self._get_config(config or {'frames_per_sample':300})
-        samples = [[], []]
-        for i,f in enumerate((person_files, non_person_files)):
-
-            if (isinstance(f, str)):
-                f = [f]
-
-            files = []
-            for path in f:
-                if os.path.isdir(path):
-                    tmp, _ = self.process_video(fdir=path, config=config)
-                    samples[i] += tmp
-                else:
-                    files.append(path)
-            if files:
-                tmp, _ = self.process_video(files=files, config=config)
-                samples[i] += tmp
-
-        clf = train_specific_person_classifier(samples[0], samples[1], self, person_name,clf_type, show_trainig_performance)
-        if (save): self.save_classifier(clf)
-        return clf
-
     def save_classifier(self,clf, fname=None, out_dir=None):
         out_dir = out_dir or self.config['out_dir']
         path = out_dir + f'/{fname or clf.labels_map[1]}-clf.joblib'
@@ -176,3 +144,18 @@ class VideoAnalizer():
                 labels['test'][len(test_X)+labels_offset[1]] = d
                 test_X.append(x)
         return train_X, test_X, labels
+
+    def train_OneClassSVM(self, directory_of_videos, config=None, rich_features=True):
+        """
+        input:
+            - directory_of_videos:  folder containing real people of the same person
+            - config:               settings to extract samples
+            - rich_features:        use 190 features from the paper or 250
+        """
+        config = self._get_config(config or {'frames_per_sample':1000})
+        X, _ = self.process_video(fdir=directory_of_videos, config=config, rich=rich_features)
+        clf = OneClassRbf(self, rich_features)
+        clf.fit(X)
+
+        return clf
+
