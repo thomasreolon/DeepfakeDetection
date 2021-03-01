@@ -17,7 +17,6 @@ folders_list=[
 labels = ['Real YT Videos', 'Fake YT Videos']
 vd.plot_features(folders_list=folders_list, root_dir=ROOT_DIR, labels=labels, plot_type='PCA', save_path=SAVE_PATH)
 
-exit(0)
 
 # Plot real videos from YT vs fake videos from YT
 folders_list=[
