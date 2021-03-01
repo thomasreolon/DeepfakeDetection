@@ -148,14 +148,13 @@ class OpenFaceAPI():
             exe = 'FeatureExtraction'
 
         # get files parameters
-        formats = ('.avi', '.mp4')
         more=None
         if fdir:
             fdir = self._get_abs_path(fdir)
             files = os.listdir(fdir)
             files = self._non_in_cache(files, res, output_extractor.VidDataExtractor)
-            files = [f'-f "{f}"' for f in files if f[-4:] in formats]
-            paths = [f for f in os.listdir(fdir) if f[-4:] in formats]
+            files = [f'-f "{f}"' for f in files]
+            paths = [f for f in os.listdir(fdir)]
             if (len(files)>100):
                 more  = files[100:]
                 files = files[:100]
@@ -164,7 +163,7 @@ class OpenFaceAPI():
             files = [self._get_abs_path(f) for f in files]
             files = self._non_in_cache(files, res, output_extractor.VidDataExtractor)
             paths = [f.split('/')[-1] for f in files]
-            src = ' '.join([f'-f "{f}"' for f in files if f[-4:] in formats])
+            src = ' '.join([f'-f "{f}"' for f in files])
 
 
 
