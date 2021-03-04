@@ -4,7 +4,7 @@ from .openface import OpenFaceAPI
 from .openface import parts
 from .samplesextractor import extract_samples
 from .covariance import get_190_features, get_rich_features
-from .classifier import OneClassRbf
+from .classifier import OneClassRbf, BoostedOneClassRbf
 from .plots import plot_features2D
 
 class VideoAnalizer():
@@ -145,7 +145,7 @@ class VideoAnalizer():
                 test_X.append(x)
         return train_X, test_X, labels
 
-    def train_OneClassSVM(self, directory_of_videos, config=None, rich_features=True):
+    def train_OneClassSVM(self, directory_of_videos, config=None, rich_features=False, boosted=False):
         """
         input:
             - directory_of_videos:  folder containing real people of the same person
@@ -154,7 +154,8 @@ class VideoAnalizer():
         """
         config = self._get_config(config or {'frames_per_sample':1000})
         X, _ = self.process_video(fdir=directory_of_videos, config=config, rich=rich_features)
-        clf = OneClassRbf(self, rich_features)
+        Clf =  (boosted and BoostedOneClassRbf) or OneClassRbf
+        clf = Clf(self, rich_features)
         clf.fit(X)
 
         return clf

@@ -136,10 +136,10 @@ class CLF():
         pass
 
 # 4.1 class for OneClassSVM
-class CLFPaper(CLF):
+class CLFPaper1(CLF):
     def __init__(self):
-        super().__init__('OneClassSVM')
-        self.clf = OneClassSVM(gamma='auto')
+        super().__init__('OneClassSVM1')
+        self.clf = OneClassSVM(gamma='auto', nu=0.2)
     def fit(self,X,y):
         D=[]
         for a,b in zip(X,y):
@@ -150,9 +150,23 @@ class CLFPaper(CLF):
         return self.clf.predict(X)
 
 # 4.1 class for OneClassSVM
-class OneClassRbf(CLF):
+class CLFPaper2(CLF):
     def __init__(self):
-        super().__init__('OneClassSVM_rbf')
+        super().__init__('OneClassSVM2')
+        self.clf = OneClassSVM(gamma='auto', nu=0.35)
+    def fit(self,X,y):
+        D=[]
+        for a,b in zip(X,y):
+            if b==1 or random.random()>0.95:
+                D.append(a)
+        self.clf.fit(D)
+    def predict(self, X):
+        return self.clf.predict(X)
+
+# 4.1 class for OneClassSVM
+class OneClassRbf1(CLF):
+    def __init__(self):
+        super().__init__('OneClassSVM_rbf1')
         self.clf = OneClassSVM(nu=0.1, kernel="rbf", gamma=0.1)
     def fit(self,X,y):
         D=[]
@@ -163,6 +177,31 @@ class OneClassRbf(CLF):
     def predict(self, X):
         return self.clf.predict(X)
 
+class OneClassRbf2(CLF):
+    def __init__(self):
+        super().__init__('OneClassSVM_rbf2')
+        self.clf = OneClassSVM(kernel="rbf", gamma='scale')
+    def fit(self,X,y):
+        D=[]
+        for a,b in zip(X,y):
+            if b==1 or random.random()>0.95:
+                D.append(a)
+        self.clf.fit(D)
+    def predict(self, X):
+        return self.clf.predict(X)
+
+class OneClassRbf3(CLF):
+    def __init__(self):
+        super().__init__('OneClassSVM_rbf3')
+        self.clf = OneClassSVM(nu=0.2, kernel="rbf", gamma='auto')
+    def fit(self,X,y):
+        D=[]
+        for a,b in zip(X,y):
+            if b==1 or random.random()>0.95:
+                D.append(a)
+        self.clf.fit(D)
+    def predict(self, X):
+        return self.clf.predict(X)
 
 # 4.2 class for boosting
 class CLFBoost(CLF):
@@ -247,7 +286,7 @@ wrongly_classified = {}
 best3_models = [(0,'None'), (0,'None'), (0,'None')]
 
 
-for path in ['me']:    # for different people
+for path in ['Obama']:    # for different people
     REAL_PATH = PATH.format('real', path)
     FAKE_PATH = PATH.format('fake', path)
     for iteration in range(6):           # split dataset in 3 different ways
@@ -277,7 +316,7 @@ for path in ['me']:    # for different people
                     else:
                         what_features_are_selected[f_id] = 1
 
-                for Clf in (CLFPaper, OneClassRbf): #for different models
+                for Clf in [CLFPaper1, CLFPaper2]: #for different models
                     clf = Clf()
                     clf.fit(x_train, y_train)
                     y_pred = clf.predict(x_test)

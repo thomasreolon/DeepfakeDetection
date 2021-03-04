@@ -186,9 +186,9 @@ class OpenFaceAPI():
             p_path = os.path.join(out_dir, p.split('.')[0])
             # remove folder of output images (not used after)
             if (os.path.exists(p_path+'_aligned')):
-                os.system(f'rm -r {p_path}_aligned')
+                os.system(f'rm -r "{p_path}_aligned"')
             if (os.path.exists(p_path+'.avi')):
-                os.system(f'rm -r {p_path}.avi {p_path}_of_details.txt')
+                os.system(f'rm -r "{p_path}.avi" "{p_path}_of_details.txt"')
 
             # get result
             res[p] = output_extractor.VidDataExtractor(p_path, self)
