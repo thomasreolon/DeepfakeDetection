@@ -3,26 +3,33 @@ from videoanalizer import VideoAnalizer
 from sklearn.svm import SVC
 from sklearn.metrics import confusion_matrix
 
-vd = VideoAnalizer()
+RICH_FEATURES = [0,1,2] # 0 -> 190, 1 -> 250, 2 -> only rich features (60)
 
-reals = [x for x in os.listdir('../test_data/videos/real') if '__' not in x]
-fakes = [x for x in os.listdir('../test_data/videos/fake') if '__' not in x]
-R = []
-F=[]
-for d in reals:
-    v, _ = vd.process_video(fdir='../test_data/videos/real/'+d, config={'frames_per_second':600, 'overlap':2, 'only_success':True})
-    R += v
-for d in fakes:
-    v, _ = vd.process_video(fdir='../test_data/videos/fake/'+d, config={'frames_per_second':600, 'overlap':2, 'only_success':True})
-    F += v
+results = {}
 
-X = R+F
-Y = [1]*len(R)+[-1]*len(F)
+for rich in RICH_FEATURES:
+    vd = VideoAnalizer()
 
-clf = SVC(kernel='rbf')
-clf.fit(X,Y)
+    reals = [x for x in os.listdir('../test_data/videos/real') if '__' not in x]
+    fakes = [x for x in os.listdir('../test_data/videos/fake') if '__' not in x]
+    R = []
+    F=[]
+    for d in reals:
+        v, _ = vd.process_video(fdir='../test_data/videos/real/'+d, rich_features=rich, config={'frames_per_second':600, 'overlap':2, 'only_success':True})
+        R += v
+    for d in fakes:
+        v, _ = vd.process_video(fdir='../test_data/videos/fake/'+d, rich_features=rich, config={'frames_per_second':600, 'overlap':2, 'only_success':True})
+        F += v
 
-y_pred = clf.predict(X)
-print(confusion_matrix(Y, y_pred))
+    X = R+F
+    Y = [1]*len(R)+[-1]*len(F)
 
-joblib.dump(clf, 'videoanalizer/pretrainedSVC.joblib')
+    clf = SVC(kernel='rbf')
+    clf.fit(X,Y)
+
+    y_pred = clf.predict(X)
+    results[rich] = confusion_matrix(Y, y_pred)
+
+    joblib.dump(clf, f'videoanalizer/pretrainedSVC_{rich}.joblib')
+
+print(results)

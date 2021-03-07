@@ -23,7 +23,9 @@ class OneClassRbf():
             - integer that maps 'labels_map' into person is real or not
         """
         config = self.video_analizer._get_config({'interval':[(0,1e10)], 'frames_per_sample':-1})
-        x, _ = self.video_analizer.process_video(files=[path_to_video], config=config, rich=self.rich)
+        x, _ = self.video_analizer.process_video(files=[path_to_video], config=config, rich_features=self.rich)
+        if(len(x) == 0):
+            print(path_to_video)
         y = self.predict(x)[0]
 
         if (return_label): y = (y==1 and 'real' or 'fake')
@@ -32,7 +34,7 @@ class OneClassRbf():
     def fit(self, x):
         self.clf.fit(x)
         return self
-        
+
     def predict(self, x):
         return self.clf.predict(x)
 
@@ -42,7 +44,7 @@ class BoostedOneClassRbf():
         self.video_analizer = video_analizer
         self.clf1 = svm.OneClassSVM(nu=0.2, kernel="rbf", gamma='auto')
         self.clf2 = svm.OneClassSVM(gamma='auto')
-        f_path = pathlib.Path(__file__).parent.absolute().joinpath('pretrainedSVC.joblib')
+        f_path = pathlib.Path(__file__).parent.absolute().joinpath(f'pretrainedSVC_{rich}.joblib')
         self.clf3 = joblib.load(f_path)
         self.rich = rich
 
@@ -61,7 +63,7 @@ class BoostedOneClassRbf():
             - integer that maps 'labels_map' into person is real or not
         """
         config = self.video_analizer._get_config({'interval':[(0,1e10)], 'frames_per_sample':-1})
-        x, _ = self.video_analizer.process_video(files=[path_to_video], config=config, rich=self.rich)
+        x, _ = self.video_analizer.process_video(files=[path_to_video], config=config, rich_features=self.rich)
         y = self.predict(x)[0]
 
         if (return_label): y = (y==1 and 'real' or 'fake')
@@ -71,13 +73,18 @@ class BoostedOneClassRbf():
         self.clf1.fit(x)
         self.clf2.fit(x)
         return self
-        
+
     def predict(self, x):
         res=[]
         y1= self.clf1.predict(x)
         y2= self.clf2.predict(x)
-        y3= self.clf3.predict([x[0][:190]])
+        if(self.rich == 0):
+            y3= self.clf3.predict([x[0][:190]])
+        elif(self.rich == 1):
+            y3= self.clf3.predict([x[0][:250]])
+        else:
+            y3= self.clf3.predict([x[0][:60]])
+
         for r1,r2,r3 in zip(y1,y2,y3):
             res.append((r1+r2+r3>0 and 1) or -1)
         return res
-        

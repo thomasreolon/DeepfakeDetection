@@ -145,7 +145,7 @@ class VideoAnalizer():
                 test_X.append(x)
         return train_X, test_X, labels
 
-    def train_OneClassSVM(self, directory_of_videos, config=None, rich_features=False, boosted=False):
+    def train_OneClassSVM(self, directory_of_videos, config=None, rich_features=0, boosted=False):
         """
         input:
             - directory_of_videos:  folder containing real people of the same person
@@ -153,10 +153,9 @@ class VideoAnalizer():
             - rich_features:        use 190 features from the paper or 250
         """
         config = self._get_config(config or {'frames_per_sample':1000})
-        X, _ = self.process_video(fdir=directory_of_videos, config=config, rich=rich_features)
+        X, _ = self.process_video(fdir=directory_of_videos, config=config, rich_features=rich_features)
         Clf =  (boosted and BoostedOneClassRbf) or OneClassRbf
         clf = Clf(self, rich_features)
         clf.fit(X)
 
         return clf
-
