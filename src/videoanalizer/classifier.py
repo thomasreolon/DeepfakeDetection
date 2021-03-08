@@ -3,7 +3,7 @@ import joblib
 import pathlib
 
 class OneClassRbf():
-    def __init__(self, video_analizer, rich):
+    def __init__(self, video_analizer, rich, person):
         self.video_analizer = video_analizer
         self.clf = svm.OneClassSVM(nu=0.2, kernel="rbf", gamma='auto')
         self.rich = rich
@@ -40,11 +40,11 @@ class OneClassRbf():
 
 
 class BoostedOneClassRbf():
-    def __init__(self, video_analizer, rich):
+    def __init__(self, video_analizer, rich, person):
         self.video_analizer = video_analizer
         self.clf1 = svm.OneClassSVM(nu=0.2, kernel="rbf", gamma='auto')
         self.clf2 = svm.OneClassSVM(gamma='auto')
-        f_path = pathlib.Path(__file__).parent.absolute().joinpath(f'pretrainedSVC_{rich}.joblib')
+        f_path = pathlib.Path(__file__).parent.absolute().joinpath(f'pretrainedSVC_{rich}_{person}.joblib')
         self.clf3 = joblib.load(f_path)
         self.rich = rich
 
