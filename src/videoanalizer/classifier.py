@@ -1,6 +1,7 @@
 from sklearn import svm
 import joblib
 import pathlib
+from .video_edits import save_video_landmarks
 
 class OneClassRbf():
     def __init__(self, video_analizer, rich, person):
@@ -15,7 +16,7 @@ class OneClassRbf():
     def get_sklearn_clf(self):
         return self.clf
 
-    def predict_video(self, path_to_video, return_label=False):
+    def predict_video(self, path_to_video, return_label=False, landmark_video=False):
         """
         input:
             - video path
@@ -29,8 +30,12 @@ class OneClassRbf():
         y = self.predict(x)
         y = [max(0,v) for v in y]
         y = sum(y)/len(y)
-        if (return_label): y = (y>0.5 and 'real' or 'fake')
-        return y
+        label = (y>0.5 and 'real' or 'fake')
+
+        if landmark_video:
+            save_video_landmarks(path_to_video, label, self.video_analizer)
+
+        return return_label and label or y
 
     def fit(self, x):
         self.clf.fit(x)
