@@ -4,10 +4,12 @@ import pathlib
 from .video_edits import save_video_landmarks
 
 class OneClassRbf():
-    def __init__(self, video_analizer, rich, person):
+    def __init__(self, video_analizer, rich, person=None, config=None):
         self.video_analizer = video_analizer
         self.clf = svm.OneClassSVM(nu=0.2, kernel="rbf", gamma='auto')
         self.rich = rich
+        self.config = config
+        
 
     def set_video_analizer(self, video_analizer):
         """save association between classifier output and real class behind (eg. 1->Real, -1->Fake)"""
@@ -23,7 +25,7 @@ class OneClassRbf():
         oputput:
             - integer that maps 'labels_map' into person is real or not
         """
-        config = self.video_analizer._get_config({'interval':[(0,1e10)], 'frames_per_sample':1000})
+        config = self.config or self.video_analizer._get_config({'interval':[(0,1e10)], 'frames_per_sample':300})
         x, _ = self.video_analizer.process_video(files=[path_to_video], config=config, rich_features=self.rich)
         if len(x)==0:      raise Exception(f'0 samples have been extracted from {path_to_video}')
         

@@ -152,10 +152,10 @@ class VideoAnalizer():
             - config:               settings to extract samples
             - rich_features:        use 190 features from the paper or 250
         """
-        config = self._get_config(config or {'frames_per_sample':1000})
+        config = self._get_config(config or {'frames_per_sample':300})
         X, _ = self.process_video(fdir=directory_of_videos, config=config, rich_features=rich_features)
         Clf =  (boosted and BoostedOneClassRbf) or OneClassRbf
-        clf = Clf(self, rich_features, person = person)
+        clf = Clf(self, rich_features, person = person, config=config)
         clf.fit(X)
 
         return clf
