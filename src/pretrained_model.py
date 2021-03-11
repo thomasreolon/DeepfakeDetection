@@ -20,10 +20,10 @@ for rich in RICH_FEATURES:
         R = []
         F=[]
         for d in reals:
-            v, _ = vd.process_video(fdir='../test_data/videos/real/'+d, rich_features=rich, config={'frames_per_second':600, 'overlap':2, 'only_success':True})
+            v, _ = vd.process_video(fdir='../test_data/videos/real/'+d, rich_features=rich, config={'frames_per_sample':600, 'overlap':2, 'only_success':True})
             R += v
         for d in fakes:
-            v, _ = vd.process_video(fdir='../test_data/videos/fake/'+d, rich_features=rich, config={'frames_per_second':600, 'overlap':2, 'only_success':True})
+            v, _ = vd.process_video(fdir='../test_data/videos/fake/'+d, rich_features=rich, config={'frames_per_sample':600, 'overlap':2, 'only_success':True})
             F += v
 
         X = R+F
