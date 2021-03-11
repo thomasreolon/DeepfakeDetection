@@ -19,7 +19,7 @@ class OneClassRbf():
                         clfs.append({"Classifier" : svm.OneClassSVM(kernel=k, gamma=g, nu=n), "Result" : None, "Description" : f"Kernel: {k}, gamma: {g}, nu: {n}"})
             self.clfs = clfs
         else:
-            self.clf = svm.OneClassSVM(nu=0.2, kernel="rbf", gamma='auto')
+            self.clf = svm.OneClassSVM(kernel='poly', gamma=0.001, degree=5, nu=0.4, shrinking=False)
         self.rich = rich
         self.config = config
 
@@ -82,8 +82,8 @@ class OneClassRbf():
 class BoostedOneClassRbf(OneClassRbf):
     def __init__(self, video_analizer, rich, person, config=None, gridsearch=False):
         self.video_analizer = video_analizer
-        self.clf1 = svm.OneClassSVM(nu=0.2, kernel="rbf", gamma='auto')
-        self.clf2 = svm.OneClassSVM(gamma='auto')
+        self.clf1 = svm.OneClassSVM(kernel='poly', gamma=0.001, degree=5, nu=0.4, shrinking=False)
+        self.clf2 = svm.OneClassSVM(kernel='rbf', gamma='scale', degree=5, nu=0.01, shrinking=True)
         f_path = pathlib.Path(__file__).parent.absolute().joinpath(f'pretrainedSVC_{rich}_{person}.joblib')
         self.clf3 = joblib.load(f_path)
         self.rich = rich
