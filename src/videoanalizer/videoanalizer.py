@@ -153,9 +153,9 @@ class VideoAnalizer():
             - rich_features:        use 190 features from the paper or 250
         """
         config = self._get_config(config or {'frames_per_sample':300})
-        X, _ = self.process_video(fdir=directory_of_videos, config=config, rich_features=rich_features)
+        X, _ = self.process_video(fdir=directory_of_videos, config=config, rich_features=1)
         Clf =  (boosted and BoostedOneClassRbf) or OneClassRbf
-        clf = Clf(self, rich_features, person = person, config=config, gridsearch = gridsearch)
+        clf = Clf(self, rich_features=rich_features, person = person, config=config, gridsearch = gridsearch)
         clf.fit(X)
 
         return clf
