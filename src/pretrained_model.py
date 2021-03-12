@@ -5,7 +5,7 @@ from sklearn.metrics import confusion_matrix
 
 RICH_FEATURES = [0,1,2] # 0 -> 190, 1 -> 250, 2 -> only rich features (60)
 
-REMOVE_PERSON = ["ElonMusk", "Obama"]
+REMOVE_PERSON = ["thomas1", "thomas2", "morez"]
 
 results = {}
 
@@ -16,9 +16,9 @@ for rich in RICH_FEATURES:
         reals = [x for x in os.listdir('../test_data/videos/real') if '__' not in x]
         fakes = [x for x in os.listdir('../test_data/videos/fake') if '__' not in x]
         fakes.remove(person)
-        for i,r in enumerate(reals[:]):
-            if(r in REMOVE_PERSON):
-                reals[i] = f"{r}/train"
+        # for i,r in enumerate(reals[:]):
+        #     if(r in REMOVE_PERSON):
+        #         reals[i] = f"{r}/train"
         R = []
         F=[]
         for d in reals:

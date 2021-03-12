@@ -89,7 +89,7 @@ class OneClassRbf():
 
     def predict(self, x):
         x = self._get_x(x, self.rich)
-        
+
         if(self.gridsearch):
             predictions = []
             for i in range(0, len(self.clfs)):
@@ -105,18 +105,18 @@ class BoostedOneClassRbf(OneClassRbf):
         self.video_analizer = video_analizer
         self.gridsearch = False
 
-        self.params = [  
+        self.params = [
             # rich_features, outliers, params
-            (0, True, {'kernel':'poly', 'gamma':0.005, 'degree':3, 'nu':0.4,  'shrinking':True}),
+            (0, True, {'kernel':'poly', 'gamma':0.005, 'degree':3, 'nu':0.4,  'shrinking':True}), #
             (0, True, {'kernel':'rbf', 'gamma':1e-05, 'degree':20, 'nu':0.3, 'shrinking':True}),
             (0, True, {'kernel':'rbf', 'gamma':0.01, 'degree':5, 'nu':0.05, 'shrinking':False}),
-            (1, True, {'kernel':'rbf', 'gamma':1e-05, 'degree':20, 'nu':0.3, 'shrinking':True}),
+            (1, True, {'kernel':'rbf', 'gamma':1e-05, 'degree':20, 'nu':0.3, 'shrinking':True}), #
             (1, True, {'kernel':'poly', 'gamma':'scale', 'degree':2, 'nu':0.8, 'shrinking':False}),
-            (2, True, {'kernel':'rbf', 'gamma':0.1, 'degree':10, 'nu':0.3, 'shrinking':True}),
+            (2, True, {'kernel':'rbf', 'gamma':0.1, 'degree':10, 'nu':0.3, 'shrinking':True}), #
             (2, True, {'kernel':'poly', 'gamma':'scale', 'degree':2, 'nu':0.8, 'shrinking':False}),
             (0, False, {'kernel':'rbf', 'gamma':1e-05, 'degree':20, 'nu':0.3, 'shrinking':True}),
             (0, False, {'kernel':'rbf', 'gamma':0.01, 'degree':5, 'nu':0.05, 'shrinking':False}),
-            (0, False, {'kernel':'poly', 'gamma':0.005, 'degree':3, 'nu':0.4,  'shrinking':True}),
+            (0, False, {'kernel':'poly', 'gamma':0.005, 'degree':3, 'nu':0.4,  'shrinking':True}), #
             (0, False, {'kernel':'sigmoid', 'gamma':1e-05, 'degree':3, 'nu':0.2, 'shrinking':False}),
         ]
         self.clfs = [
