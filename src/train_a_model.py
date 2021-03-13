@@ -75,7 +75,7 @@ for video in videos_test:
     FN += 1 if ((result == 'fake') and (video[2] == 'real')) else 0
 
 # Write the results
-file = open("../output/results/final_results.txt", "w+")
+file = open("../output/final_results.txt", "w+")
 
 file.write(f"Accuracy: {TP/len(videos_test)}\n") # Simple accuracy
 file.write(f"f-1 score: {TP/(TP+(0.5*(FP+FN)))}\n") # f1 score
