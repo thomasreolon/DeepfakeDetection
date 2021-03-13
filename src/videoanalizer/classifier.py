@@ -13,7 +13,7 @@ class OneClassRbf():
         self.rich = rich_features
         self.config = config or self.video_analizer._get_config({'interval':[(0,1e10)], 'frames_per_sample':300})
         self.outliers = outliers
-        custom_params = custom_params or dict(kernel='rbf', gamma=0.01, degree=5, nu=0.05, shrinking=False)
+        custom_params = custom_params or dict(kernel='rbf', gamma=1e-05, degree=20, nu=0.1, shrinking=True)
         self.clf = svm.OneClassSVM(**custom_params)
 
         if(gridsearch):
@@ -34,7 +34,7 @@ class OneClassRbf():
     def get_sklearn_clf(self):
         return self.clf
 
-    def predict_video(self, path_to_video, return_label=False, landmark_video=False):
+    def predict_video(self, path_to_video, return_label=False, landmark_video=False, true_label=None):
         """
         input:
             - video path
@@ -53,7 +53,7 @@ class OneClassRbf():
                 self.clfs[i]["Result"] = (y>0.5 and 'real' or 'fake')
             return self.clfs
         else:
-            y = self.predict(x)
+            y = self.predict(x, true_label)
             y = [max(0,v) for v in y]
             y = sum(y)/len(y)
             label = (y>0.5 and 'real' or 'fake')
@@ -104,24 +104,34 @@ class BoostedOneClassRbf(OneClassRbf):
         self.config = config or self.video_analizer._get_config({'interval':[(0,1e10)], 'frames_per_sample':300})
         self.video_analizer = video_analizer
         self.gridsearch = False
+        self.predictions = []
+        self.person = person
 
         self.params = [
-            # rich_features, outliers, params
-            (0, True, {'kernel':'poly', 'gamma':0.005, 'degree':3, 'nu':0.4,  'shrinking':True}), #
-            (0, True, {'kernel':'rbf', 'gamma':1e-05, 'degree':20, 'nu':0.3, 'shrinking':True}),
-            (0, True, {'kernel':'rbf', 'gamma':0.01, 'degree':5, 'nu':0.05, 'shrinking':False}),
-            (1, True, {'kernel':'rbf', 'gamma':1e-05, 'degree':20, 'nu':0.3, 'shrinking':True}), #
-            (1, True, {'kernel':'poly', 'gamma':'scale', 'degree':2, 'nu':0.8, 'shrinking':False}),
-            (2, True, {'kernel':'rbf', 'gamma':0.1, 'degree':10, 'nu':0.3, 'shrinking':True}), #
-            (2, True, {'kernel':'poly', 'gamma':'scale', 'degree':2, 'nu':0.8, 'shrinking':False}),
-            (0, False, {'kernel':'rbf', 'gamma':1e-05, 'degree':20, 'nu':0.3, 'shrinking':True}),
-            (0, False, {'kernel':'rbf', 'gamma':0.01, 'degree':5, 'nu':0.05, 'shrinking':False}),
-            (0, False, {'kernel':'poly', 'gamma':0.005, 'degree':3, 'nu':0.4,  'shrinking':True}), #
-            (0, False, {'kernel':'sigmoid', 'gamma':1e-05, 'degree':3, 'nu':0.2, 'shrinking':False}),
+            # rich_features, outliers, params, weight
+            (0, True, {'kernel':'poly', 'gamma':0.005, 'degree':3, 'nu':0.4,  'shrinking':True}, 0.6), 
+            (0, True, {'kernel':'rbf', 'gamma':1e-05, 'degree':20, 'nu':0.3, 'shrinking':True}, 0.95),
+            (0, True, {'kernel':'rbf', 'gamma':0.01, 'degree':5, 'nu':0.05, 'shrinking':False}, 0.75),
+            (1, True, {'kernel':'rbf', 'gamma':1e-05, 'degree':20, 'nu':0.3, 'shrinking':True}, 0.95),
+            (1, True, {'kernel':'poly', 'gamma':'scale', 'degree':2, 'nu':0.8, 'shrinking':False}, 0.5),
+            (2, True, {'kernel':'rbf', 'gamma':0.1, 'degree':10, 'nu':0.3, 'shrinking':True}, 0.75),
+            (2, True, {'kernel':'poly', 'gamma':'scale', 'degree':2, 'nu':0.8, 'shrinking':False}, 0.6),
+            (0, False, {'kernel':'rbf', 'gamma':1e-05, 'degree':20, 'nu':0.3, 'shrinking':True}, 0.85),
+            (0, False, {'kernel':'rbf', 'gamma':0.01, 'degree':5, 'nu':0.05, 'shrinking':False}, 0.75),
+            (0, False, {'kernel':'poly', 'gamma':0.005, 'degree':3, 'nu':0.4,  'shrinking':True}, 0.6),
+            (0, False, {'kernel':'sigmoid', 'gamma':1e-05, 'degree':3, 'nu':0.2, 'shrinking':False}, 0.75),
+            (1, False, {'kernel':'rbf', 'gamma':1e-05, 'degree':20, 'nu':0.1, 'shrinking':True}, 0.85),
+            (1, True, {'kernel':'rbf', 'gamma':1e-05, 'degree':20, 'nu':0.1, 'shrinking':True}, 0.85),
+            (0, False, {'kernel':'rbf', 'gamma':1e-05, 'degree':20, 'nu':0.1, 'shrinking':True}, 0.85),
+            (0, True, {'kernel':'rbf', 'gamma':1e-05, 'degree':20, 'nu':0.1, 'shrinking':True}, 0.75)
         ]
         self.clfs = [
-            OneClassRbf(video_analizer, rich_features=r, outliers=o, custom_params=p)   for r, o, p in self.params
+            OneClassRbf(video_analizer, rich_features=r, outliers=o, custom_params=p)   for r, o, p, w in self.params
         ]
+        cms = []
+        for clf in self.clfs:
+            cms.append([[0],[0],[0],[0]])
+        self.cms = cms
 
     def get_sklearn_clf(self):
         return self.clfs[0]
@@ -132,10 +142,28 @@ class BoostedOneClassRbf(OneClassRbf):
             clf.fit(x)
         return self
 
-    def predict(self, x):
-        res=np.array([0]*len(x))
-        for clf in self.clfs:
-            res += clf.predict(x)
+    def get_confusion_matrix(self):
+        return self.cms, self.person
+
+    def predict(self, x, true_label):
+        res=np.array([0]*len(x), dtype="float64")
+        for index, clf in enumerate(self.clfs):
+            p_list = clf.predict(x)
+            p = np.array(p_list, dtype="float64")
+            p *= [self.params[index][3]]
+            if(true_label != None):
+                for pred in p_list:
+                    if(pred == true_label):
+                        if(pred == 1):
+                            self.cms[index][0][0]+=1
+                        else:
+                            self.cms[index][3][0]+=1
+                    else:
+                        if(pred == 1):
+                            self.cms[index][1][0]+=1
+                        else:
+                            self.cms[index][2][0]+=1
+            res += p
 
         return [r>0 and 1 or 0 for r in res]
 
