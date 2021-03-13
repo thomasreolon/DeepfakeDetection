@@ -19,7 +19,8 @@ for person in people:
     for file in os.listdir(path):
         videos_test.append([path + "/" + file, p, "fake"])
 
-#Add real videos for testing
+#Add manually real videos for testing
+#path, index of the person, true label
 videos_test.append(['../test_data/videos/real/Obama/test/obama1.mp4',4, "real"])
 videos_test.append(['../test_data/videos/real/Obama/test/obama1_real.mp4',4, "real"])
 videos_test.append(['../test_data/videos/real/Obama/test/President_Barack_Obama_NCB.mp4',4, "real"])
@@ -32,11 +33,12 @@ videos_test.append(['../test_data/videos/real/ElonMusk/test/Elon_MuskpYH8.mp4',3
 # For debugging & consistency
 os.chdir(pathlib.Path(__file__).parent.absolute())
 
-clf = [] # clf[0] = thomas1, clf[1] = thomas2, clf[2] = moreno
+clf = [] # clf[0] = thomas1, clf[1] = thomas2, clf[2] = moreno, clf[3] = Elon, clf[4] = Obama, clf[5] = Renzi
 
 # Train a pipeline for each person
 # Thomas Reolon
 vd = VideoAnalizer()
+# Boosted = True -> use the pipeline of models, the best method
 clf.append(vd.train_OneClassSVM('../test_data/videos/real/thomas1', boosted=True, person = "thomas1"))
 # Other Thomas (friend)
 vd2 = VideoAnalizer()
@@ -73,8 +75,6 @@ for video in videos_test:
 # Write the results
 file = open("../output/results/final_results.txt", "w+")
 
-file.write(f"Boosted: {boosted} ")
-file.write(f"Rich: {R} ")
 file.write(f"Accuracy: {TP/len(videos_test)}\n") # Simple accuracy
 file.write(f"f-1 score: {TP/(TP+(0.5*(FP+FN)))}\n") # f1 score
 file.write("-------\n")
