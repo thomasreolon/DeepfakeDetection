@@ -3,9 +3,9 @@ from gdrive import GoogleDriveDownloader as gdd
 
 os.chdir(pathlib.Path(__file__).parent.absolute())
 
+#GDRIVE_CODE = '1La_4SVYRNT8ePgLzZGwlxuY1V9x989DC'  # old dataset
+GDRIVE_CODE = '---------'
 DATA_DIR = '../test_data'
-GDRIVE_CODE = '1La_4SVYRNT8ePgLzZGwlxuY1V9x989DC'
-
 
 ######## Create Directory & Download Videos
 
