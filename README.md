@@ -76,7 +76,7 @@ In orther to run this script:
     cd src
     python3 create_landmarks.py
 ```
-The videos will be saved under ```output/```
+The videos will be saved under ```output/```.  
 This is the result predicting videos about Obama and Elon Musk:
 #### Obama (real - fake)
 <img src="https://media.giphy.com/media/K9YzMLteKq6sg5VJMh/giphy.gif" width="400" height="300" />  <img src="https://media.giphy.com/media/h9kD101j2VEXIjw9eY/giphy.gif" width="400" height="300" />
