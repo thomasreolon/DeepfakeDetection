@@ -41,3 +41,9 @@ You can type:
 ```
 During the first run the program will ask you to install automatically OpenFace in the project folder, otherwise you can add your current path to OpenFace manually on the code.
 After the processing the processed video will be displayed. The outputs from OpenFace will be available under <project>/output/openfacesaves/
+
+## Examples
+### Obama (real - fake)
+<img src="https://media.giphy.com/media/K9YzMLteKq6sg5VJMh/giphy.gif" width="470" height="320" />  <img src="https://media.giphy.com/media/h9kD101j2VEXIjw9eY/giphy.gif" width="470" height="320" />
+### Elon Musk (real - fake)
+<img src="https://media.giphy.com/media/h31mo3j1UgSc8XE5Cx/giphy.gif" width="470" height="320" />  <img src="https://media.giphy.com/media/keuDEb10tk9Jnkpwi0/giphy.gif" width="470" height="320" />
