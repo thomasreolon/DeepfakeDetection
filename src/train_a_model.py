@@ -56,17 +56,24 @@ for boosted in [True]:
 
         results = {}
 
-        sum = 0
+        TP = 0
+        FP = 0
+        FN = 0
+
         for video in videos_test:
             # tl = 1 if video[2]=="real" else -1
             result = clf[video[1]].predict_video(video[0], return_label=True)
             results[video[0]] = result
-            sum += 1 if result == video[2] else 0
+            TP += 1 if result == video[2] else 0
+            FP += 1 if ((result == 'real') and (video[2] == 'fake')) else 0
+            FN += 1 if ((result == 'fake') and (video[2] == 'real')) else 0
 
         file.write(f"Boosted: {boosted} ")
         file.write(f"Rich: {R} ")
-        file.write(f"Accuracy: {sum/len(videos_test)}\n")
+        file.write(f"Accuracy: {TP/len(videos_test)}\n")
+        file.write(f"f-1 score: {TP/(TP+(0.5*(FP+FN)))}\n")
         file.write("-------\n")
+
         # for c in clf:
         #     cms, person = c.get_confusion_matrix()
         #     file.write(f"Person: {person}: \n")
