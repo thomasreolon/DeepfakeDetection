@@ -126,10 +126,10 @@ class VideoAnalizer():
 
         plot_features2D(samples, out_dir, labels or fold_names, plot_type, )
 
-    '''
-    A function to split the dataset in train and test set
-    '''
     def split_train_test(self, X, vid, train_fraction=0.66, labels_offset=None, deterministic = False):
+        """
+        A function to split the dataset in train and test set
+        """
         train_X, test_X, vids = [], [], sorted(list(set(vid)))
         k=1+int(len(vids)*(train_fraction))
         if(deterministic):
@@ -156,7 +156,7 @@ class VideoAnalizer():
         - boosted:              if True it uses the pipeline of models (15) to train and predict, one OneClassSVM otherwise
         - person:               the person to which the videos are related
     """
-    def train_OneClassSVM(self, directory_of_videos, config=None, rich_features=0, boosted=False, person="thomas1"):
+    def train_OneClassSVM(self, directory_of_videos, config=None, rich_features=0, boosted=True, person="thomas1"):
         config = self._get_config(config or {'frames_per_sample':300})
         # extract 250 features (X)
         X, _ = self.process_video(fdir=directory_of_videos, config=config, rich_features=1)

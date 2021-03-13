@@ -2,6 +2,8 @@ import os, pathlib
 from videoanalizer import VideoAnalizer
 
 '''
+run download_dataset.py to get the videos before trying this script
+
 Starting from a dataset of real and fake videos about people, this script splits these videos in test set (fake + some real videos) and training set (only real videos)
 divided based on the video's person.
 Then it trains the pipeline of models (one pipeline for each person of the dataset)
@@ -36,7 +38,7 @@ os.chdir(pathlib.Path(__file__).parent.absolute())
 clf = [] # clf[0] = thomas1, clf[1] = thomas2, clf[2] = moreno, clf[3] = Elon, clf[4] = Obama, clf[5] = Renzi
 
 # Train a pipeline for each person
-# Thomas Reolon
+# Thomas
 vd = VideoAnalizer()
 # Boosted = True -> use the pipeline of models, the best method
 clf.append(vd.train_OneClassSVM('../test_data/videos/real/thomas1', boosted=True, person = "thomas1"))
