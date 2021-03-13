@@ -44,6 +44,6 @@ After the processing the processed video will be displayed. The outputs from Ope
 
 ## Examples
 ### Obama (real - fake)
-<img src="https://media.giphy.com/media/K9YzMLteKq6sg5VJMh/giphy.gif" width="450" height="320" />  <img src="https://media.giphy.com/media/h9kD101j2VEXIjw9eY/giphy.gif" width="450" height="320" />
+<img src="https://media.giphy.com/media/K9YzMLteKq6sg5VJMh/giphy.gif" width="400" height="300" />  <img src="https://media.giphy.com/media/h9kD101j2VEXIjw9eY/giphy.gif" width="400" height="300" />
 ### Elon Musk (real - fake)
-<img src="https://media.giphy.com/media/h31mo3j1UgSc8XE5Cx/giphy.gif" width="450" height="320" />  <img src="https://media.giphy.com/media/keuDEb10tk9Jnkpwi0/giphy.gif" width="450" height="320" />
+<img src="https://media.giphy.com/media/h31mo3j1UgSc8XE5Cx/giphy.gif" width="400" height="300" />  <img src="https://media.giphy.com/media/keuDEb10tk9Jnkpwi0/giphy.gif" width="400" height="300" />
