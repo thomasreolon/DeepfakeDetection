@@ -126,6 +126,9 @@ class VideoAnalizer():
 
         plot_features2D(samples, out_dir, labels or fold_names, plot_type, )
 
+    '''
+    A function to split the dataset in train and test set
+    '''
     def split_train_test(self, X, vid, train_fraction=0.66, labels_offset=None, deterministic = False):
         train_X, test_X, vids = [], [], sorted(list(set(vid)))
         k=1+int(len(vids)*(train_fraction))
@@ -145,16 +148,21 @@ class VideoAnalizer():
                 test_X.append(x)
         return train_X, test_X, labels
 
+    """
+    input:
+        - directory_of_videos:  folder containing real people of the same person
+        - config:               settings to extract samples
+        - rich_features:        0 -> 250 features (paper), 1->250, 2->60 (if boosted True default features will be used (based on the model, see classifier.py))
+        - boosted:              if True it uses the pipeline of models (15) to train and predict, one OneClassSVM otherwise
+        - person:               the person to which the videos are related
+    """
     def train_OneClassSVM(self, directory_of_videos, config=None, rich_features=0, boosted=False, person="thomas1"):
-        """
-        input:
-            - directory_of_videos:  folder containing real people of the same person
-            - config:               settings to extract samples
-            - rich_features:        use 190 features from the paper or 250 or 60
-        """
         config = self._get_config(config or {'frames_per_sample':300})
+        # extract 250 features (X)
         X, _ = self.process_video(fdir=directory_of_videos, config=config, rich_features=1)
+        # choose method based on boosted
         Clf =  (boosted and BoostedOneClassRbf) or OneClassRbf
+        # initialize and train the model
         clf = Clf(self, rich_features=rich_features, person = person, config=config)
         clf.fit(X)
 
