@@ -6,15 +6,20 @@ The project contains a wrapper to openface and a system of models to predict if 
 ---
 
 ## Project structure:
+
     SIV_project
     ├── src
-    |    ├── openface               [package to interact with OpenFace]
-    |    |   ├── errors             [library which contains errors]
-    |    |   ├── face_comparator    [script to compare the similarity between two faces]
-    |    │   ├── installer          [script that can install OpenFace automatically]
-    |    │   ├── openfaceapi        [class that can process images/videos]
-    |    |   ├── output_extractor   [script to extract features from the openface's csv]
-    |    |   └── parts              [library which contains information about face's parts]
+    |    ├── videoanalizer                [gives functions to process videos]
+    |    |    ├── openface                [package that interact with OpenFace]
+    |    |    |    ├── errors             [library which contains errors]
+    |    |    |    ├── face_comparator    [script to compare the similarity between two faces]
+    |    |    │    ├── installer          [script that can install OpenFace automatically]
+    |    |    │    ├── openfaceapi        [class that can process images/videos]
+    |    |    |    ├── output_extractor   [script to extract features from the openface's csv]
+    |    |    |    └── parts              [library which contains information about face's parts]
+    |    |    |
+    |    |    ├── videoanalizer
+    |    |
     |    |
     |    ├── create_landmarks       [create the video with the landmark real or fake based on the predictions]
     |    ├── download_dataset       [download our dataset]
@@ -23,30 +28,44 @@ The project contains a wrapper to openface and a system of models to predict if 
     |    └── train_a_model          [train and test the final classification system]
     |
     |
-    └── test_data                   [dataset of video for training and testing (not visible)]                                              
+    └── test_data                   [dataset of video for training and testing (not visible)]
 
-                          
 ---
+
+## Installation
+
+```
+    git clone https://github.com/Moreno98/SIV_project.git
+    cd SIV_project
+    python3 download_dataset.py
+```
+
+During the first run the program will ask you to install automatically OpenFace in the project folder, otherwise you can add your current path to OpenFace manually on the code.
 
 ## Usage
 
 You can type:
+
 ```
     cd src
     python3 analize_vid.py --vn obama2.mp4
 ```
-During the first run the program will ask you to install automatically OpenFace in the project folder, otherwise you can add your current path to OpenFace manually on the code.
+
 After the processing the processed video will be displayed. The outputs from OpenFace will be available under <project>/output/openfacesaves/
 
 ## Train and test the classification system
+
 After downloading the dataset (download_dataset) you may use the classification system running:
+
 ```
     cd src
     python3 train_a_model.py
 ```
-The performance results will be saved under ```output/results/final_results.txt```.
+
+The performance results will be saved under `output/results/final_results.txt`.
 
 ### Dataset structure:
+
     test_data
     └── videos
         ├── fake                  [Fake videos]
@@ -68,18 +87,24 @@ The performance results will be saved under ```output/results/final_results.txt`
             ├── thomas1           [About Thomas]
             ├── thomas2           [About Second thomas]
             └── morez             [About Moreno]
-            
+
 ### Use landmarks
+
 This project also offer a script to attach to a video the predicted landmarks (using our system) using the landmark function offered by openface.
 In orther to run this script:
+
 ```
     cd src
     python3 create_landmarks.py
 ```
-The videos will be saved under ```output/```.  
-This is the result predicting videos about Obama and Elon Musk:
-#### Obama (real - fake)
-<img src="https://media.giphy.com/media/K9YzMLteKq6sg5VJMh/giphy.gif" width="400" height="300" />  <img src="https://media.giphy.com/media/h9kD101j2VEXIjw9eY/giphy.gif" width="400" height="300" />
-#### Elon Musk (real - fake)
-<img src="https://media.giphy.com/media/h31mo3j1UgSc8XE5Cx/giphy.gif" width="400" height="300" />  <img src="https://media.giphy.com/media/keuDEb10tk9Jnkpwi0/giphy.gif" width="400" height="300" />
 
+The videos will be saved under `output/`.  
+This is the result predicting videos about Obama and Elon Musk:
+
+#### Obama (real - fake)
+
+<img src="https://media.giphy.com/media/K9YzMLteKq6sg5VJMh/giphy.gif" width="400" height="300" /> <img src="https://media.giphy.com/media/h9kD101j2VEXIjw9eY/giphy.gif" width="400" height="300" />
+
+#### Elon Musk (real - fake)
+
+<img src="https://media.giphy.com/media/h31mo3j1UgSc8XE5Cx/giphy.gif" width="400" height="300" /> <img src="https://media.giphy.com/media/keuDEb10tk9Jnkpwi0/giphy.gif" width="400" height="300" />

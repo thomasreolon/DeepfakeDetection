@@ -1,5 +1,6 @@
 import os, pathlib
 from gdrive import GoogleDriveDownloader as gdd
+from videoanalizer import VideoAnalizer
 
 os.chdir(pathlib.Path(__file__).parent.absolute())
 
@@ -16,3 +17,10 @@ if (len(os.listdir(DATA_DIR))==0):
                                         dest_path=DATA_DIR+'/dataset.zip',
                                         unzip=True)
     os.system(f'rm {DATA_DIR}/dataset.zip')
+
+
+
+######## This will fail and ask you to install OpenFace
+
+# press y to install OpenFace
+VideoAnalizer()
