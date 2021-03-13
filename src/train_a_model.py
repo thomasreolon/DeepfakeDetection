@@ -1,8 +1,16 @@
 import os, pathlib
 from videoanalizer import VideoAnalizer
 
-# 0 = thomas1, 1 = thomas2, 2 = moreno
+'''
+Starting from a dataset of real and fake videos about people, this script splits these videos in test set (fake + some real videos) and training set (only real videos)
+divided based on the video's person.
+Then it trains the pipeline of models (one pipeline for each person of the dataset)
+Then it tests the perfomances on the test set, the results will be stored in ../output/results/final_results.txt
+'''
+
+# Extract test set (fake)
 a = [x for x in os.listdir('../test_data/videos/fake') if '__' not in x]
+# thomas1: 0, thomas2 (friend): 1, moreno: 2, Elon: 3, Obama: 4, Renzi: 5
 people = ["thomas1", "thomas2", "morez", "ElonMusk", "Obama", "Renzi"]
 videos_test = []
 for person in people:
@@ -11,6 +19,7 @@ for person in people:
     for file in os.listdir(path):
         videos_test.append([path + "/" + file, p, "fake"])
 
+#Add real videos for testing
 videos_test.append(['../test_data/videos/real/Obama/test/obama1.mp4',4, "real"])
 videos_test.append(['../test_data/videos/real/Obama/test/obama1_real.mp4',4, "real"])
 videos_test.append(['../test_data/videos/real/Obama/test/President_Barack_Obama_NCB.mp4',4, "real"])
@@ -23,62 +32,51 @@ videos_test.append(['../test_data/videos/real/ElonMusk/test/Elon_MuskpYH8.mp4',3
 # For debugging & consistency
 os.chdir(pathlib.Path(__file__).parent.absolute())
 
+clf = [] # clf[0] = thomas1, clf[1] = thomas2, clf[2] = moreno
+
+# Train a pipeline for each person
+# Thomas Reolon
+vd = VideoAnalizer()
+clf.append(vd.train_OneClassSVM('../test_data/videos/real/thomas1', boosted=True, person = "thomas1"))
+# Other Thomas (friend)
+vd2 = VideoAnalizer()
+clf.append(vd2.train_OneClassSVM('../test_data/videos/real/thomas2', boosted=True, person = "thomas2"))
+# Moreno
+vd3 = VideoAnalizer()
+clf.append(vd3.train_OneClassSVM('../test_data/videos/real/morez', boosted=True, person = "morez"))
+# Elon Musk
+vd4 = VideoAnalizer()
+clf.append(vd4.train_OneClassSVM('../test_data/videos/real/ElonMusk/train', boosted=True, person = "ElonMusk"))
+# Obama
+vd5 = VideoAnalizer()
+clf.append(vd5.train_OneClassSVM('../test_data/videos/real/Obama/train', boosted=True, person = "Obama"))
+# Renzi
+vd6 = VideoAnalizer()
+clf.append(vd6.train_OneClassSVM('../test_data/videos/real/Renzi', boosted=True, person = "Renzi"))
+
+# Tests
+
+results = {}
+
+TP = 0 #True Positive
+FP = 0 #False Positive
+FN = 0 #False Negative
+
+# For each test video, predict its label and store the results for the accuracies
+for video in videos_test:
+    result = clf[video[1]].predict_video(video[0], return_label=True)
+    results[video[0]] = result
+    TP += 1 if result == video[2] else 0
+    FP += 1 if ((result == 'real') and (video[2] == 'fake')) else 0
+    FN += 1 if ((result == 'fake') and (video[2] == 'real')) else 0
+
+# Write the results
 file = open("../output/results/final_results.txt", "w+")
 
-for boosted in [True]:
-    # RICH = [0]
-    # if boosted:
-    RICH = [0]
-    for rich in RICH:
-        R = "190" if rich==0 else "250" if rich==1 else "only rich features"
-        clf = [] # clf[0] = thomas1, clf[1] = thomas2, clf[2] = moreno
-
-        # Train Classifier 1 (thomas reolon)
-        vd = VideoAnalizer()
-        clf.append(vd.train_OneClassSVM('../test_data/videos/real/thomas1', rich_features=rich, boosted=boosted, person = "thomas1"))
-        # Train Classifier 2 (other thomas)
-        vd2 = VideoAnalizer()
-        clf.append(vd2.train_OneClassSVM('../test_data/videos/real/thomas2', rich_features=rich, boosted=boosted, person = "thomas2"))
-        # Train Classifier 3 (moreno)
-        vd3 = VideoAnalizer()
-        clf.append(vd3.train_OneClassSVM('../test_data/videos/real/morez', rich_features=rich, boosted=boosted, person = "morez"))
-
-        vd4 = VideoAnalizer()
-        clf.append(vd4.train_OneClassSVM('../test_data/videos/real/ElonMusk/train', rich_features=rich, boosted=boosted, person = "ElonMusk"))
-
-        vd5 = VideoAnalizer()
-        clf.append(vd5.train_OneClassSVM('../test_data/videos/real/Obama/train', rich_features=rich, boosted=boosted, person = "Obama", gridsearch = False))
-
-        vd6 = VideoAnalizer()
-        clf.append(vd6.train_OneClassSVM('../test_data/videos/real/Renzi', rich_features=rich, boosted=boosted, person = "Renzi", gridsearch = False))
-
-        # Tests
-
-        results = {}
-
-        TP = 0
-        FP = 0
-        FN = 0
-
-        for video in videos_test:
-            # tl = 1 if video[2]=="real" else -1
-            result = clf[video[1]].predict_video(video[0], return_label=True)
-            results[video[0]] = result
-            TP += 1 if result == video[2] else 0
-            FP += 1 if ((result == 'real') and (video[2] == 'fake')) else 0
-            FN += 1 if ((result == 'fake') and (video[2] == 'real')) else 0
-
-        file.write(f"Boosted: {boosted} ")
-        file.write(f"Rich: {R} ")
-        file.write(f"Accuracy: {TP/len(videos_test)}\n")
-        file.write(f"f-1 score: {TP/(TP+(0.5*(FP+FN)))}\n")
-        file.write("-------\n")
-
-        # for c in clf:
-        #     cms, person = c.get_confusion_matrix()
-        #     file.write(f"Person: {person}: \n")
-        #     for i, cm in enumerate(cms):
-        #         file.write(f"{i}: {cm}\n")
-        #     file.write("-------\n")
+file.write(f"Boosted: {boosted} ")
+file.write(f"Rich: {R} ")
+file.write(f"Accuracy: {TP/len(videos_test)}\n") # Simple accuracy
+file.write(f"f-1 score: {TP/(TP+(0.5*(FP+FN)))}\n") # f1 score
+file.write("-------\n")
 
 file.close()

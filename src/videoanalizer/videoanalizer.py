@@ -37,7 +37,7 @@ class VideoAnalizer():
                     tmp[k] = v
         return tmp
 
-    def process_video(self, files=None, fdir=None, config=None, rich=False, rich_features=0):
+    def process_video(self, files=None, fdir=None, config=None, rich_features=0):
         """
         returns a list of array where each array contains the 190 features.
         number of arrays = sum_video [ n_frames(get_only_frames_in(video, interval))/frames_per_sample ]
@@ -71,7 +71,7 @@ class VideoAnalizer():
                                     mouth_h = parts.MOUTH_H,
                                     mouth_v = parts.MOUTH_V)
                 features = get_190_features(raw_features)
-                if (rich or (rich_features == 1)): # instead of 190 --> 250
+                if (rich_features == 1): # instead of 190 --> 250
                     features += get_rich_features(raw_features)
                 if(rich_features == 2): # only reach features
                     features = get_rich_features(raw_features)
@@ -145,17 +145,17 @@ class VideoAnalizer():
                 test_X.append(x)
         return train_X, test_X, labels
 
-    def train_OneClassSVM(self, directory_of_videos, config=None, rich_features=0, boosted=False, person="thomas1", gridsearch = False):
+    def train_OneClassSVM(self, directory_of_videos, config=None, rich_features=0, boosted=False, person="thomas1"):
         """
         input:
             - directory_of_videos:  folder containing real people of the same person
             - config:               settings to extract samples
-            - rich_features:        use 190 features from the paper or 250
+            - rich_features:        use 190 features from the paper or 250 or 60
         """
         config = self._get_config(config or {'frames_per_sample':300})
         X, _ = self.process_video(fdir=directory_of_videos, config=config, rich_features=1)
         Clf =  (boosted and BoostedOneClassRbf) or OneClassRbf
-        clf = Clf(self, rich_features=rich_features, person = person, config=config, gridsearch = gridsearch)
+        clf = Clf(self, rich_features=rich_features, person = person, config=config)
         clf.fit(X)
 
         return clf

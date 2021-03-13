@@ -7,25 +7,13 @@ from .video_edits import save_video_landmarks
 
 
 class OneClassRbf():
-    def __init__(self, video_analizer, rich_features=0, person=None, config=None, gridsearch=False, outliers=True, custom_params=None):
+    def __init__(self, video_analizer, rich_features=0, person=None, config=None, outliers=True, custom_params=None):
         self.video_analizer = video_analizer
-        self.gridsearch = gridsearch
         self.rich = rich_features
         self.config = config or self.video_analizer._get_config({'interval':[(0,1e10)], 'frames_per_sample':300})
         self.outliers = outliers
         custom_params = custom_params or dict(kernel='rbf', gamma=1e-05, degree=20, nu=0.1, shrinking=True)
         self.clf = svm.OneClassSVM(**custom_params)
-
-        if(gridsearch):
-            kernels = ['linear', 'rbf', 'poly', 'rbf', 'sigmoid']
-            gammas = ['scale', 'auto']
-            nu = [0.05,0.1,0.2,0.3,0.4,0.5]
-            clfs = []
-            for k in kernels:
-                for g in gammas:
-                    for n in nu:
-                        clfs.append({"Classifier" : svm.OneClassSVM(kernel=k, gamma=g, nu=n), "Result" : None, "Description" : f"Kernel: {k}, gamma: {g}, nu: {n}"})
-            self.clfs = clfs
 
     def set_video_analizer(self, video_analizer):
         """save association between classifier output and real class behind (eg. 1->Real, -1->Fake)"""
@@ -34,7 +22,7 @@ class OneClassRbf():
     def get_sklearn_clf(self):
         return self.clf
 
-    def predict_video(self, path_to_video, return_label=False, landmark_video=False, true_label=None):
+    def predict_video(self, path_to_video, return_label=False, landmark_video=False):
         """
         input:
             - video path
@@ -44,19 +32,10 @@ class OneClassRbf():
         x, _ = self.video_analizer.process_video(files=[path_to_video], config=self.config, rich_features=1)
         if len(x)==0:      raise Exception(f'0 samples have been extracted from {path_to_video}')
 
-        if(self.gridsearch):
-            predictions = self.predict(x)
-            results = []
-            for i,y in enumerate(predictions):
-                y = [max(0,v) for v in y]
-                y = sum(y)/len(y)
-                self.clfs[i]["Result"] = (y>0.5 and 'real' or 'fake')
-            return self.clfs
-        else:
-            y = self.predict(x, true_label)
-            y = [max(0,v) for v in y]
-            y = sum(y)/len(y)
-            label = (y>0.5 and 'real' or 'fake')
+        y = self.predict(x)
+        y = [max(0,v) for v in y]
+        y = sum(y)/len(y)
+        label = (y>0.5 and 'real' or 'fake')
 
         if landmark_video:
             save_video_landmarks(path_to_video, label, self.video_analizer)
@@ -79,37 +58,24 @@ class OneClassRbf():
 
     def fit(self, x):
         x = self._get_x(x, self.rich, self.outliers)
-
-        if(self.gridsearch):
-            for i in range(0, len(self.clfs)):
-                self.clfs[i]["Classifier"].fit(x)
-        else:
-            self.clf.fit(x)
+        self.clf.fit(x)
         return self
 
     def predict(self, x):
         x = self._get_x(x, self.rich)
-
-        if(self.gridsearch):
-            predictions = []
-            for i in range(0, len(self.clfs)):
-                predictions.append(self.clfs[i]["Classifier"].predict(x))
-            return predictions
-        else:
-            return self.clf.predict(x)
+        return self.clf.predict(x)
 
 
 class BoostedOneClassRbf(OneClassRbf):
-    def __init__(self, video_analizer, rich_features=None, config=None, person=None, gridsearch=None):
+    def __init__(self, video_analizer, rich_features=None, config=None, person=None):
         self.config = config or self.video_analizer._get_config({'interval':[(0,1e10)], 'frames_per_sample':300})
         self.video_analizer = video_analizer
-        self.gridsearch = False
         self.predictions = []
         self.person = person
 
         self.params = [
             # rich_features, outliers, params, weight
-            (0, True, {'kernel':'poly', 'gamma':0.005, 'degree':3, 'nu':0.4,  'shrinking':True}, 0.6), 
+            (0, True, {'kernel':'poly', 'gamma':0.005, 'degree':3, 'nu':0.4,  'shrinking':True}, 0.6),
             (0, True, {'kernel':'rbf', 'gamma':1e-05, 'degree':20, 'nu':0.3, 'shrinking':True}, 0.95),
             (0, True, {'kernel':'rbf', 'gamma':0.01, 'degree':5, 'nu':0.05, 'shrinking':False}, 0.75),
             (1, True, {'kernel':'rbf', 'gamma':1e-05, 'degree':20, 'nu':0.3, 'shrinking':True}, 0.95),
@@ -128,10 +94,6 @@ class BoostedOneClassRbf(OneClassRbf):
         self.clfs = [
             OneClassRbf(video_analizer, rich_features=r, outliers=o, custom_params=p)   for r, o, p, w in self.params
         ]
-        cms = []
-        for clf in self.clfs:
-            cms.append([[0],[0],[0],[0]])
-        self.cms = cms
 
     def get_sklearn_clf(self):
         return self.clfs[0]
@@ -142,27 +104,11 @@ class BoostedOneClassRbf(OneClassRbf):
             clf.fit(x)
         return self
 
-    def get_confusion_matrix(self):
-        return self.cms, self.person
-
-    def predict(self, x, true_label):
+    def predict(self, x):
         res=np.array([0]*len(x), dtype="float64")
         for index, clf in enumerate(self.clfs):
-            p_list = clf.predict(x)
-            p = np.array(p_list, dtype="float64")
+            p = np.array(clf.predict(x), dtype="float64")
             p *= [self.params[index][3]]
-            if(true_label != None):
-                for pred in p_list:
-                    if(pred == true_label):
-                        if(pred == 1):
-                            self.cms[index][0][0]+=1
-                        else:
-                            self.cms[index][3][0]+=1
-                    else:
-                        if(pred == 1):
-                            self.cms[index][1][0]+=1
-                        else:
-                            self.cms[index][2][0]+=1
             res += p
 
         return [r>0 and 1 or 0 for r in res]
