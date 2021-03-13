@@ -45,7 +45,7 @@ After downloading the dataset (download_dataset) you may use the classification 
     python3 train_a_model.py
 ```
 
-### Project structure:
+### Dataset structure:
     test_data
     └── videos
         ├── fake                  [Fake videos]
