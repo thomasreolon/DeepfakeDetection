@@ -1,8 +1,5 @@
 from sklearn import svm
-import joblib
-import pathlib
 import numpy as np
-from sklearn.model_selection import GridSearchCV
 from .video_edits import save_video_landmarks
 
 
