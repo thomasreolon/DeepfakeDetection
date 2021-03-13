@@ -10,7 +10,7 @@ def extract_samples(dx:VidDataExtractor, config:dict):
     if not all(setting in config for setting in ()):
         raise Exception("configs must contain 'interval', 'frames_per_sample','overlap' and 'only_success")
     intervals           = config['interval']
-    fps                 = config['frames_per_sample']
+    fps                 = int(config['frames_per_sample'])
     overlap             = config['overlap']
     only_success        = config['only_success']
 
@@ -48,8 +48,8 @@ def extract_samples(dx:VidDataExtractor, config:dict):
 
     # add some overlapping points
     if overlap:
-        init = fps // (overlap+1)
-        for i in range(init, len(frames), step=fps/overlap):
+        init = int(fps // (overlap+1))
+        for i in range(init, len(frames), int(fps//overlap)):
             points.append(i)
 
     # foreach point p found, get a dx in starting from p and ending in p+fps

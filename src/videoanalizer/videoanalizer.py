@@ -4,7 +4,7 @@ from .openface import OpenFaceAPI
 from .openface import parts
 from .samplesextractor import extract_samples
 from .covariance import get_190_features, get_rich_features
-from .classifier import train_specific_person_classifier
+from .classifier import OneClassRbf, BoostedOneClassRbf
 from .plots import plot_features2D
 
 class VideoAnalizer():
@@ -37,7 +37,7 @@ class VideoAnalizer():
                     tmp[k] = v
         return tmp
 
-    def process_video(self, files=None, fdir=None, config=None, rich=False, rich_features=0):
+    def process_video(self, files=None, fdir=None, config=None, rich_features=0):
         """
         returns a list of array where each array contains the 190 features.
         number of arrays = sum_video [ n_frames(get_only_frames_in(video, interval))/frames_per_sample ]
@@ -71,7 +71,7 @@ class VideoAnalizer():
                                     mouth_h = parts.MOUTH_H,
                                     mouth_v = parts.MOUTH_V)
                 features = get_190_features(raw_features)
-                if (rich or (rich_features == 1)): # instead of 190 --> 250
+                if (rich_features == 1): # instead of 190 --> 250
                     features += get_rich_features(raw_features)
                 if(rich_features == 2): # only reach features
                     features = get_rich_features(raw_features)
@@ -82,38 +82,6 @@ class VideoAnalizer():
 
         return samples, videoids
 
-
-    def train_classifier(self, person_files, non_person_files, person_name='Real', clf_type='OneClassSVM', config=None, show_trainig_performance=False, save=False):
-        """
-        input:
-            person_files is a list of folders or files that contain a person
-            person_non_files is a list folders or files that contains fakes, other people
-            person_name is the name of the person in person_files
-
-        output:
-            a classifier that can recognize person_name in videos
-        """
-        config = self._get_config(config or {'frames_per_sample':300})
-        samples = [[], []]
-        for i,f in enumerate((person_files, non_person_files)):
-
-            if (isinstance(f, str)):
-                f = [f]
-
-            files = []
-            for path in f:
-                if os.path.isdir(path):
-                    tmp, _ = self.process_video(fdir=path, config=config)
-                    samples[i] += tmp
-                else:
-                    files.append(path)
-            if files:
-                tmp, _ = self.process_video(files=files, config=config)
-                samples[i] += tmp
-
-        clf = train_specific_person_classifier(samples[0], samples[1], self, person_name,clf_type, show_trainig_performance)
-        if (save): self.save_classifier(clf)
-        return clf
 
     def save_classifier(self,clf, fname=None, out_dir=None):
         out_dir = out_dir or self.config['out_dir']
@@ -158,6 +126,9 @@ class VideoAnalizer():
 
         plot_features2D(samples, out_dir, labels or fold_names, plot_type, )
 
+    '''
+    A function to split the dataset in train and test set
+    '''
     def split_train_test(self, X, vid, train_fraction=0.66, labels_offset=None, deterministic = False):
         train_X, test_X, vids = [], [], sorted(list(set(vid)))
         k=1+int(len(vids)*(train_fraction))
@@ -176,3 +147,23 @@ class VideoAnalizer():
                 labels['test'][len(test_X)+labels_offset[1]] = d
                 test_X.append(x)
         return train_X, test_X, labels
+
+    """
+    input:
+        - directory_of_videos:  folder containing real people of the same person
+        - config:               settings to extract samples
+        - rich_features:        0 -> 250 features (paper), 1->250, 2->60 (if boosted True default features will be used (based on the model, see classifier.py))
+        - boosted:              if True it uses the pipeline of models (15) to train and predict, one OneClassSVM otherwise
+        - person:               the person to which the videos are related
+    """
+    def train_OneClassSVM(self, directory_of_videos, config=None, rich_features=0, boosted=False, person="thomas1"):
+        config = self._get_config(config or {'frames_per_sample':300})
+        # extract 250 features (X)
+        X, _ = self.process_video(fdir=directory_of_videos, config=config, rich_features=1)
+        # choose method based on boosted
+        Clf =  (boosted and BoostedOneClassRbf) or OneClassRbf
+        # initialize and train the model
+        clf = Clf(self, rich_features=rich_features, person = person, config=config)
+        clf.fit(X)
+
+        return clf

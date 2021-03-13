@@ -63,10 +63,17 @@ AU_paper_r = ['AU01_r', 'AU02_r', 'AU04_r', 'AU05_r', 'AU06_r', 'AU07_r', 'AU09_
 AU_paper_c = ['AU01_c', 'AU02_c', 'AU04_c', 'AU05_c', 'AU06_c', 'AU07_c', 'AU09_c', 'AU10_c', 'AU12_c', 'AU14_c', 'AU15_c', 'AU17_c', 'AU20_c', 'AU23_c', 'AU25_c', 'AU26_c']
 POSE_ROTATION_X_Z = ['pose_Rx', 'pose_Rz']
 
+# External features
 MOUTH_right = 54
 MOUTH_left = 48
 MOUTH_up = 51
 MOUTH_down = 57
+
+# Internal features
+# MOUTH_right = 64
+# MOUTH_left = 60
+# MOUTH_up = 62
+# MOUTH_down = 66
 
 MOUTH_H_x_a = 'X_'+str(MOUTH_right)
 MOUTH_H_y_a = 'Y_'+str(MOUTH_right)

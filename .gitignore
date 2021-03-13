@@ -139,3 +139,4 @@ dmypy.json
 **/output
 **/test_data
 **/test_data_old
+*.joblib
