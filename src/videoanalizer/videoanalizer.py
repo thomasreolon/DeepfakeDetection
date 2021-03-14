@@ -83,11 +83,6 @@ class VideoAnalizer():
         return samples, videoids
 
 
-    def save_classifier(self,clf, fname=None, out_dir=None):
-        out_dir = out_dir or self.config['out_dir']
-        path = out_dir + f'/{fname or clf.labels_map[1]}-clf.joblib'
-        dump(clf, path)
-
 
     def plot_features(self, folders_list, root_dir=None, labels=None, plot_type='PCA', config=None, save_path=None):
         """
