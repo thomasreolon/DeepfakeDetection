@@ -137,6 +137,18 @@ Every instance of VideoAnalizer contains an instance of OpenFaceAPI, you can use
     vd.api.process_video(fdir='./foldervid')
 ```
 
+## Performances
+
+We test this set up on a 6GB dataset about 6 different people: Obama, Elon Musk, Renzi (Italian politician), Thomas (author), Moreno (author) and one our friend. The dataset is divided in real and fake videos. We train the system on the real videos (one pipeline for each person) and we test on real and fake videos (based on the person).
+The final overall performances are:
+
+| Method | Value |
+| :---: | :---: |
+| Accuracy | 89% |
+| F1-score | 94.5% |
+
+Since this is an accademic project we do not go ahead trying new configuratons in order to have better performances. Still the results we have are a good starting point for future improvements.
+
 ## Dataset structure:
 
     test_data
