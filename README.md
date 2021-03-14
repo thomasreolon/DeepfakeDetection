@@ -1,9 +1,12 @@
+[![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/Naereen/StrapDown.js/blob/master/LICENSE) [![Maintenance](https://img.shields.io/badge/Maintained%3F-No-red.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity) [![Generic badge](https://img.shields.io/badge/python-3.7%20|%203.8-blue.svg)](https://shields.io/) [![Generic badge](https://img.shields.io/badge/version-v1.0-cc.svg)](https://shields.io/)
+
 # Fake detention in videos
 
 This project uses [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace.git) to analyze faces in videos and the ideas from [Agarwal et al.](https://openaccess.thecvf.com/content_CVPRW_2019/papers/Media%20Forensics/Agarwal_Protecting_World_Leaders_Against_Deep_Fakes_CVPRW_2019_paper.pdf) to train robust classifiers of a specific person.
 The project contains a wrapper to openface and a module that can train models to detect deepfakes.
 
-This notebook shows how to install videoanalizer and how to train a simple model to detect fake videos of Obama: [Notebook](https://colab.research.google.com/drive/1S2W_YrA8aGveSOdao07hveSkOzuBIRBk?usp=sharing)
+[![Open In Collab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1S2W_YrA8aGveSOdao07hveSkOzuBIRBk?usp=sharing)
+This notebook shows how to install videoanalizer and how to train a simple model to detect fake videos of Obama.
 (this is only an example... Do NOT run the notebook, it takes more than 1 hour to install OpenFace and another whole hour to process Obama's videos)
 
 ---
