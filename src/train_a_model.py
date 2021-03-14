@@ -82,3 +82,7 @@ file.write(f"f-1 score: {TP/(TP+(0.5*(FP+FN)))}\n") # f1 score
 file.write("-------\n")
 
 file.close()
+
+print("----------------------------------------")
+print("Results under output/final_results.txt")
+print("----------------------------------------")
