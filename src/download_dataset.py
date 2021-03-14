@@ -14,7 +14,8 @@ if ('test_data' not in os.listdir('../')):
     print("Default dataset size: 6GB")
     gdd.download_file_from_google_drive(file_id=GDRIVE_CODE,    # my GDrive
                                         dest_path='../dataset.zip',
-                                        unzip=True)
+                                        unzip=True,
+                                        showsize=True)
     os.system('rm ../dataset.zip')
 
 
