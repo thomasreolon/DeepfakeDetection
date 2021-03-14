@@ -11,10 +11,11 @@ GDRIVE_CODE = '1djFwp9vLkmOtd65ylXSYYn7C1ju08lJ7'
 
 if ('test_data' not in os.listdir('../')):
     # if folder is empty, get videos from gdrive
+    print("Default dataset size: 6GB")
     gdd.download_file_from_google_drive(file_id=GDRIVE_CODE,    # my GDrive
                                         dest_path='../dataset.zip',
                                         unzip=True)
-    os.system(f'rm ../dataset.zip')
+    os.system('rm ../dataset.zip')
 
 
 
