@@ -51,6 +51,9 @@ class OpenFaceAPI():
         self._check_init_files(openface_path)
 
         # Create Folder to save OpanFace results
+        if not os.path.exists(out_dir):
+            os.system(f'mkdir -p "{out_dir}"')
+
         self.out_dir = self._get_abs_path(out_dir)
         try:
             os.mkdir(out_dir)
