@@ -1,5 +1,4 @@
 import os, random, numpy as np
-from joblib import dump
 from .openface import OpenFaceAPI
 from .openface import parts
 from .samplesextractor import extract_samples
@@ -14,9 +13,45 @@ class VideoAnalizer():
     the video are analyzed calling openface api, which is a python API for OpenFace
 
     you can specify configs like interval (which frames),  frames per samples (divide the interval in more parts), ...
+    
+    Attributes
+    ----------
+
+    config:  dict
+        default configurations when processing a video
+    
+    api:     OpenFaceAPI
+        instance of OpenFaceAPI, which is a wrapper module that interact with the C implementation of OpenFace
     """
     def __init__(self, **kw):
-        openface_out_dir = '/'.join(str(__file__).split('/')[:-1])+'/../../output/openfacesaves'
+        """
+        This function create an instance of VideoAnalizer, which exposes some methods to process videos
+
+        Parameters
+        ----------
+        openface_dir='./openface/OpenFace': str
+            path to the root folder of OpenFace, default: inside openface module
+
+        interval=WHOLE VIDEO:               list of intervals
+            which intervals of frames must be processed
+        
+        frames_per_sample=-1:               int
+            how many frames are needed to generate a sample, default 1 sample per video
+
+        overlap=0:                          int
+            generate more samples in proportion to overlap, but they can overlap
+        
+        only_success=True:                  bool
+            if True exclude frames where OpenFace was not confident
+
+        vtype='single':                     'single'|'multi'
+            which OpenFace executable is to be used. multi can track multiple faces, but it is less precise
+
+        out_dir='../../output':             str
+            where to save the results of the computations
+        """
+        openface_dir = 'openface_dir' in kw and kw['openface_dir'] or None
+        openface_out_dir = openface_dir or '/'.join(str(__file__).split('/')[:-1])+'/../../output/openfacesaves'
         self.api = OpenFaceAPI(out_dir=openface_out_dir)      # use openfaceAPI to process videos at low level
         # Default configs
         self.config = {
@@ -45,12 +80,38 @@ class VideoAnalizer():
 
         we take the 20 Action Units from openface, than we look for the correlation between them (which is the 190 final features)
 
-        steps:
+        Steps
+        -----
         1) pass the video to openface
         2) get ActionUnits from openface
         3) split the videos in more parts (as specified in config, default no splits)
         4) get the correlation for each part
         5) return the correlations
+
+        Parameters
+        ----------
+
+        files:                  list of strings
+            list of files to process  (only one between files and fdir will be used)
+
+        fdir:                   str
+            folder containing videos to process 
+
+        config:                 dict
+            config that will override
+            self.config = {
+                'interval':[(0,1e20)],   #  intervals of frame to use, default: whole video
+                'frames_per_sample': -1, #  -1 means every frame ; >0 means that a video with 600 frames will have 600/frames_per_sample samples
+                'overlap': 0,            #  add overlapping samples (0->NO, 1->double, 2->triple)
+                'only_success': True,    #  drop frames where openface is not confident
+                'vtype': 'single',       #  detect one 'single' or multiple 'multi' faces in the videos
+                'out_dir': '/'.join(str(__file__).split('/')[:-1])+'/../../output',
+            }
+
+        rich_features=0:        int
+            0 --> 190 features as specified in Agarwal et al.
+            2 --> 60 features wich are average, std and max of the 20 Action Units
+            1 --> 250 features =  60 + 190
 
         """
         if files is None and fdir is None:
@@ -90,6 +151,8 @@ class VideoAnalizer():
         each list of folders will have the same label.
         root_dir is the relative path to the folders.
 
+        eg. plot_features(folders_list=[[obama1, obama2], [fakeobama]], rootdir='./videos', labels=['obama', 'fake'])
+        
         videos
         |--obama1
             |----vid1.mp4
@@ -98,10 +161,34 @@ class VideoAnalizer():
             |----vid0.mp4
         |--fakeobama
             |----fake.mp4
+            
+        Parameters
+        ----------
+        folders_list:        list of list
+            each sublist contains paths to folders of videos. each sublist will have a different color in the final plot
+        
+        root_dir:             str
+            root path,  folder list path will be calculated relatively from there
 
+        labels:               list of string
+            a label to assign to each sublist in folder_list. default: the first folder in the sublist
 
-        plot_features(folders_list=[[obama1, obama2], [fakeobama]], rootdir='./videos', labels=['obama', 'fake'])
+        plot_type:            'PCA'|'LDA'
+            which feature extraction method to use
 
+        config:               dict
+            config that will override
+            self.config = {
+                'interval':[(0,1e20)],   #  intervals of frame to use, default: whole video
+                'frames_per_sample': -1, #  -1 means every frame ; >0 means that a video with 600 frames will have 600/frames_per_sample samples
+                'overlap': 0,            #  add overlapping samples (0->NO, 1->double, 2->triple)
+                'only_success': True,    #  drop frames where openface is not confident
+                'vtype': 'single',       #  detect one 'single' or multiple 'multi' faces in the videos
+                'out_dir': '/'.join(str(__file__).split('/')[:-1])+'/../../output',
+            }
+
+        save_path:           str
+            where to store the plot. If None the plot will be shown live (plt.show())
         """
         config = self._get_config(config or {'frames_per_sample':300})
         samples, fold_names = [], []
@@ -121,37 +208,103 @@ class VideoAnalizer():
 
         plot_features2D(samples, out_dir, labels or fold_names, plot_type, )
 
-    def split_train_test(self, X, vid, train_fraction=0.66, labels_offset=None, deterministic = False):
+    def split_train_test(self, real_dir, fake_dir=None, train_fraction=0.66, deterministic = False, config=None, rich_features=0):
         """
         A function to split the dataset in train and test set
-        """
-        train_X, test_X, vids = [], [], sorted(list(set(vid)))
-        k=1+int(len(vids)*(train_fraction))
-        if(deterministic):
-            train_vids_id = set(vids[i] for i in range(k))
-        else:
-            train_vids_id = set(random.choices(vids, k=k))
-        labels = {'train':{}, 'test':{}}
-        if labels_offset is None:
-            labels_offset = (0,0)
-        for x, d in zip(X, vid):
-            if d in train_vids_id:
-                labels['train'][len(train_X)+labels_offset[0]] = d
-                train_X.append(x)
-            else:
-                labels['test'][len(test_X)+labels_offset[1]] = d
-                test_X.append(x)
-        return train_X, test_X, labels
 
-    """
-    input:
-        - directory_of_videos:  folder containing real people of the same person
-        - config:               settings to extract samples
-        - rich_features:        0 -> 250 features (paper), 1->250, 2->60 (if boosted True default features will be used (based on the model, see classifier.py))
-        - boosted:              if True it uses the pipeline of models (15) to train and predict, one OneClassSVM otherwise
-        - person:               the person to which the videos are related
-    """
-    def train_OneClassSVM(self, directory_of_videos, config=None, rich_features=0, boosted=True, person="thomas1"):
+        Parameters
+        ----------
+
+        real_dir:       str
+            path to a directory that cantains real videos (of the same person)
+ 
+        fake_dir:       str
+            path to a directory that contains fake videos (of the same person)
+
+        train_fraction: float
+            how many video assign to training and test in proportion
+
+        deterministic:  bool
+            if the split is random or deterministic
+
+        config:               dict
+            config that will override self.config
+            self.config = {
+                'interval':[(0,1e20)],   #  intervals of frame to use, default: whole video
+                'frames_per_sample': -1, #  -1 means every frame ; >0 means that a video with 600 frames will have 600/frames_per_sample samples
+                'overlap': 0,            #  add overlapping samples (0->NO, 1->double, 2->triple)
+                'only_success': True,    #  drop frames where openface is not confident
+                'vtype': 'single',       #  detect one 'single' or multiple 'multi' faces in the videos
+                'out_dir': '/'.join(str(__file__).split('/')[:-1])+'/../../output',
+            }
+
+        rich_features=0:        int
+            0 --> 190 features as specified in Agarwal et al.
+            2 --> 60 features wich are average, std and max of the 20 Action Units
+            1 --> 250 features =  60 + 190
+        
+        """
+
+        # process video
+        config = config or self.config
+        X_r, vids = self.process_video(fdir=real_dir, config=config, rich_features=rich_features)
+
+        # how many videos in the training set
+        unique_vids = list(set(vids))
+        k=1+int(len(unique_vids)*(train_fraction))
+
+        # which videos in the training set
+        train_vids_id = set(unique_vids[i] for i in range(k))  if deterministic else set(random.choices(unique_vids, k=k))
+
+        # generate dataset
+        x_train = [x for x,v_id in zip(X_r, vids) if v_id in train_vids_id]
+        x_test  = [x for x,v_id in zip(X_r, vids) if v_id not in train_vids_id]
+        y_train = [1]*len(x_train)
+        y_test  = [1]*len(x_test)
+
+        # do the same for fakes (binary classifier)
+        if fake_dir:
+            X_f, vids = self.process_video(fdir=fake_dir, config=config, rich_features=rich_features)
+            unique_vids = list(set(vids))
+            k=1+int(len(unique_vids)*(train_fraction))
+            train_vids_id = set(unique_vids[i] for i in range(k))  if deterministic else set(random.choices(unique_vids, k=k))
+            x_train += [x for x,v_id in zip(X_f, vids) if v_id in train_vids_id]
+            x_test  += [x for x,v_id in zip(X_f, vids) if v_id not in train_vids_id]
+            y_train += [-1]*len(x_train)
+            y_test  += [-1]*len(x_test)
+
+        return x_train, y_train, x_test, y_test
+
+    def train_OneClassSVM(self, directory_of_videos, config=None, rich_features=0, boosted=True, person="unknown"):
+        """
+        Parameters
+        ----------
+        directory_of_videos:     str
+            folder containing real people of the same person
+
+        config:                  dict
+            settings to extract samples
+            default_config = {
+                'interval':[(0,1e20)],   #  intervals of frame to use, default: whole video
+                'frames_per_sample': -1, #  -1 means every frame ; >0 means that a video with 600 frames will have 600/frames_per_sample samples
+                'overlap': 0,            #  add overlapping samples (0->NO, 1->double, 2->triple)
+                'only_success': True,    #  drop frames where openface is not confident
+                'vtype': 'single',       #  detect one 'single' or multiple 'multi' faces in the videos
+                'out_dir': '/'.join(str(__file__).split('/')[:-1])+'/../../output',
+            }
+
+        rich_features:           int  
+            ignored if boosted True: default parameters will be used, see classifier.py
+            0 --> 190 features as specified in Agarwal et al.
+            2 --> 60 features wich are average, std and max of the 20 Action Units
+            1 --> 250 features =  60 + 190
+
+        boosted:                 bool      
+            if True it uses the pipeline of models (15) to train and predict, one OneClassSVM otherwise
+        
+        person:                  str
+            the person to which the videos are related
+        """
         config = self._get_config(config or {'frames_per_sample':300})
         # extract 250 features (X)
         X, _ = self.process_video(fdir=directory_of_videos, config=config, rich_features=1)

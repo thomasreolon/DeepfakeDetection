@@ -88,7 +88,7 @@ VideoAnalizer offers some function to process data, for example:
 
 - train_OneClassSVM | takes as input folder of real videos of a person, returns a trained classifier of deepfakes (3)
 - process_video | takes as input some videos, returns a tuple containing a list of vectors (vector is 190 featues) and a list that says which video produced each vector (4)
-- split_train_test | takes as input the output of process_video and splits them in taining and test (5)
+- split_train_test | takes a folder process it and splits the results in taining and test (5)
 - plot_features | takes as input folders of videos, outputs the result of PCA/LDA on the processed videos (6)
 
 ```python
@@ -99,9 +99,10 @@ VideoAnalizer offers some function to process data, for example:
     clf = vd.train_OneClassSVM('./folder')     # (3)
 
     x, v_id = vd.process_video(files=['Obama.mp4', 'Elon.mp4']) # (4)
-    x_train, x_test, labels = vd.split_train_test(x, v_id)      # (5)
 
-    vd.plot_features([['./folderObama'], ['./folderElon1', './folderElon2']]) # (6)
+    x_train, y_train, x_test, y_test = vd.split_train_test(real_dir='./realObamas') # (5)
+
+    vd.plot_features([['./folderObama'], ['./folderElon1', './folderElon2']])       # (6)
 ```
 
 Many functions take as input **config**, this dict tells the videoanalizer how to extract videos.
