@@ -1,4 +1,4 @@
-# Fake detention in videos
+# Fake detection in videos
 
 This project uses [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace.git) to analyze faces in videos and the ideas from [Agarwal et al.](https://openaccess.thecvf.com/content_CVPRW_2019/papers/Media%20Forensics/Agarwal_Protecting_World_Leaders_Against_Deep_Fakes_CVPRW_2019_paper.pdf) to train robust classifiers of a specific person.
 The project contains a wrapper to openface and a module that can train models to detect deepfakes.
