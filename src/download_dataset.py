@@ -5,7 +5,7 @@ from videoanalizer import VideoAnalizer
 os.chdir(pathlib.Path(__file__).parent.absolute())
 
 #GDRIVE_CODE = '1La_4SVYRNT8ePgLzZGwlxuY1V9x989DC'  # old dataset
-GDRIVE_CODE = '---------'
+GDRIVE_CODE = '1djFwp9vLkmOtd65ylXSYYn7C1ju08lJ7'
 DATA_DIR = '../test_data'
 
 ######## Create Directory & Download Videos
