@@ -144,7 +144,7 @@ The final overall performances are:
 
 | Method | Value |
 | :---: | :---: |
-| Accuracy | 89% |
+| Accuracy | 89.6% |
 | F1-score | 94.5% |
 
 Since this is an accademic project we do not go ahead trying new configuratons in order to have better performances. Still the results we have are a good starting point for future improvements.
