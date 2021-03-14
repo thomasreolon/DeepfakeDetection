@@ -1,6 +1,6 @@
 # Fake detection in videos
 
-This project uses [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace.git) to analyze faces in videos and the ideas from [Agarwal et al.](https://openaccess.thecvf.com/content_CVPRW_2019/papers/Media%20Forensics/Agarwal_Protecting_World_Leaders_Against_Deep_Fakes_CVPRW_2019_paper.pdf) to train robust classifiers of a specific person.
+This project uses [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace.git) to analyze faces in videos and the ideas from [Agarwal et al.](https://openaccess.thecvf.com/content_CVPRW_2019/papers/Media%20Forensics/Agarwal_Protecting_World_Leaders_Against_Deep_Fakes_CVPRW_2019_paper.pdf) to train robust classifiers on a specific person.
 The project contains a wrapper to openface and a module that can train models to detect deepfakes.
 
 This notebook shows how to install videoanalizer and how to train a simple model to detect fake videos of Obama: [Notebook](https://colab.research.google.com/drive/1S2W_YrA8aGveSOdao07hveSkOzuBIRBk?usp=sharing)
