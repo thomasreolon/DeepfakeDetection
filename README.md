@@ -140,6 +140,16 @@ Every instance of VideoAnalizer contains an instance of OpenFaceAPI, you can use
 ## Performances
 
 We test this set up on a 6GB dataset about 6 different people: Obama, Elon Musk, Renzi (Italian politician), Thomas (author), Moreno (author) and one our friend. The dataset is divided in real and fake videos. We train the system on the real videos (one pipeline for each person) and we test on real and fake videos (based on the person).
+
+| Person | #Train videos (all reals) | #Test real videos | #Test fake videos | Total |
+| :---: | :---: | :---: | :---: | :---: |
+| Obama | 5 | 5 | 16 | 26 |
+| Elon Musk | 4 | 2 | 12 | 18 |
+| Thomas | 4 | 0 | 5 | 9 |
+| Moreno | 3 | 0 | 3| 6 |
+| Friend | 4 | 0 | 2 | 6 |
+| Renzi | 2 | 0 | 3 | 5 |
+
 The final overall performances are:
 
 | Method | Value |
