@@ -143,12 +143,14 @@ We test this set up on a 6GB dataset about 6 different people: Obama, Elon Musk,
 
 | Person | #Train videos (all reals) | #Test real videos | #Test fake videos | Total |
 | :---: | :---: | :---: | :---: | :---: |
-| Obama | 5 | 5 | 16 | 26 |
-| Elon Musk | 4 | 2 | 12 | 18 |
-| Thomas | 4 | 0 | 5 | 9 |
-| Moreno | 3 | 0 | 3| 6 |
-| Friend | 4 | 0 | 2 | 6 |
-| Renzi | 2 | 0 | 3 | 5 |
+| Obama | 18' (37) | 10’ 30’’ (22) | 7’ (21) | 35' 30'' (80) |
+| Elon Musk | 56’ 30’’ (115) | 7’ 30’’ (16) | 8’ 30’’ (22) | 72' 30'' (153) |
+| Thomas | 22’ 30’’ (46) | 0 | 1’ (5) | 23' 30 (51) |
+| Moreno | 17’ (35) | 0 | 35’’ (3) | 17' 35'' (38) |
+| Friend | 18’ 40’’ (39) | 0 | 24’’ (2) | 19' 04'' (41) |
+| Renzi | 15’ (31) | 0 | 12’ 30’’ (25) | 27' 30'' (56) |
+
+(*) -> number of samples (one every 30'')
 
 The final overall performances are:
 
